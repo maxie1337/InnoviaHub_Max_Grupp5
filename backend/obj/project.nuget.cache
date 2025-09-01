@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "h6HhbxyO/DE=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\perss\\InnoviaHub_Grupp5\\backend\\backend.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\perss\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.8\\microsoft.aspnetcore.openapi.9.0.8.nupkg.sha512",
+    "C:\\Users\\perss\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512",
+    "C:\\Users\\perss\\.nuget\\packages\\scalar.aspnetcore\\2.7.2\\scalar.aspnetcore.2.7.2.nupkg.sha512"
+  ],
+  "logs": []
+}
