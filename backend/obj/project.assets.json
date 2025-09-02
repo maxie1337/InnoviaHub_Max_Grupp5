@@ -111,19 +111,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\perss\\.nuget\\packages\\": {}
+    "C:\\Users\\heidi\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\perss\\InnoviaHub_Grupp5\\backend\\backend.csproj",
+      "projectUniqueName": "C:\\Users\\heidi\\Desktop\\JU\\Uppgifter\\17_Innovia Hub\\InnoviaHub_Grupp5\\backend\\backend.csproj",
       "projectName": "backend",
-      "projectPath": "C:\\Users\\perss\\InnoviaHub_Grupp5\\backend\\backend.csproj",
-      "packagesPath": "C:\\Users\\perss\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\perss\\InnoviaHub_Grupp5\\backend\\obj\\",
+      "projectPath": "C:\\Users\\heidi\\Desktop\\JU\\Uppgifter\\17_Innovia Hub\\InnoviaHub_Grupp5\\backend\\backend.csproj",
+      "packagesPath": "C:\\Users\\heidi\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\heidi\\Desktop\\JU\\Uppgifter\\17_Innovia Hub\\InnoviaHub_Grupp5\\backend\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\perss\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\heidi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
