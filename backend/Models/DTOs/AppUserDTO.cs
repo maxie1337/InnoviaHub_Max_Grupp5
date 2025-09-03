@@ -1,6 +1,6 @@
 namespace InnoviaHub_Grupp5.Models.DTOs
 {
-    public class UserDTO
+    public class AppUserDTO
     {
         public string Name { get; set; }
         public string Email { get; set; }
