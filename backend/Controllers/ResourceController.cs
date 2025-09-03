@@ -4,9 +4,55 @@ using backend.Models;
 using backend.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using InnoviaHub_Grupp5.Services;
+using InnoviaHub_Grupp5.Models.DTOs;
+
 
 namespace backend.Controllers
 {
+    /*[ApiController]
+    [Route("api/[controller]")]
+    public class ResourceController : ControllerBase
+    {
+        private readonly IResourceService _service;
+        public ResourceController(IResourceService service) => _service = service;
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll() =>
+            Ok(await _service.GetAllAsync());
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var resource = await _service.GetByIdAsync(id);
+            return resource == null ? NotFound() : Ok(resource);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] ResourceDTO dto)
+        {
+            var created = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(Get), new { id = created }, created);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] ResourceDTO dto)
+        {
+            var updated = await _service.UpdateAsync(id, dto);
+            return updated == null ? NotFound() : Ok(updated);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id) =>
+            await _service.DeleteAsync(id) ? NoContent() : NotFound();
+    }*/
+
+
+
+
+
+
+
     [ApiController]
     [Route("api/[controller]")]
     public class ResourcesController : ControllerBase

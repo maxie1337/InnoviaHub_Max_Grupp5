@@ -9,7 +9,7 @@ namespace InnoviaHub_Grupp5.Mapping
         public MappingProfile()
         {
             CreateMap<Booking, BookingDTO>();
-            CreateMap<Resource, ResourcesDTO>();
+            CreateMap<Resource, ResourceDTO>();
             CreateMap<AppUser, AppUserDTO>();
         }
     }
