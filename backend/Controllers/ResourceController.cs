@@ -10,50 +10,73 @@ using InnoviaHub_Grupp5.Models.DTOs;
 
 namespace backend.Controllers
 {
-    /*[ApiController]
+   [ApiController]
     [Route("api/[controller]")]
     public class ResourceController : ControllerBase
     {
         private readonly IResourceService _service;
-        public ResourceController(IResourceService service) => _service = service;
 
+        public ResourceController(IResourceService service)
+        {
+            _service = service;
+        }
+
+        // GET: api/resource
         [HttpGet]
-        public async Task<IActionResult> GetAll() =>
-            Ok(await _service.GetAllAsync());
+        public async Task<IActionResult> GetAll()
+        {
+            var resources = await _service.GetAllAsync();
+            return Ok(resources);
+        }
 
+        // GET: api/resource/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             var resource = await _service.GetByIdAsync(id);
             return resource == null ? NotFound() : Ok(resource);
         }
 
+        // POST: api/resource
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ResourceDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(Get), new { id = created }, created);
+            return CreatedAtAction(nameof(GetById), new { id = created }, created);
         }
 
+        // PUT: api/resource/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] ResourceDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var updated = await _service.UpdateAsync(id, dto);
             return updated == null ? NotFound() : Ok(updated);
         }
 
+        // DELETE: api/resource/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id) =>
-            await _service.DeleteAsync(id) ? NoContent() : NotFound();
-    }*/
+        public async Task<IActionResult> Delete(int id)
+        {
+            var deleted = await _service.DeleteAsync(id);
+            return deleted ? NoContent() : NotFound();
+        }
+    }
 
 
 
 
+/// <summary>
+/// /////////////////////////////////////////////////////////////////////////
+/// </summary>/
 
 
-
-    [ApiController]
+   /* [ApiController]
     [Route("api/[controller]")]
     public class ResourcesController : ControllerBase
     {
@@ -135,5 +158,5 @@ namespace backend.Controllers
         {
             return await _context.Resources.AnyAsync(e => e.ResourceId == id);
         }
-    }
+    }*/
 }
