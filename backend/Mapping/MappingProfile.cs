@@ -1,5 +1,6 @@
+using System.Resources;
 using AutoMapper;
-using InnoviaHub_Grupp5.Models;
+using backend.Models;
 using InnoviaHub_Grupp5.Models.DTOs;
 
 namespace InnoviaHub_Grupp5.Mapping
@@ -9,8 +10,8 @@ namespace InnoviaHub_Grupp5.Mapping
         public MappingProfile()
         {
             CreateMap<Booking, BookingDTO>();
-            CreateMap<Resources, ResourcesDTO>();
-            CreateMap<User, UserDTO>();
+            CreateMap<ResourceSet, ResourcesDTO>();
+            CreateMap<AppUser, AppUserDTO>();
         }
     }
 }
