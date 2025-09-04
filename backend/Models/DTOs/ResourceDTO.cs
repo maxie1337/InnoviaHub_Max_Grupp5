@@ -8,5 +8,6 @@ namespace InnoviaHub_Grupp5.Models.DTOs
         public int ResourceId { get; set; }
         public ResourceType Type { get; set; }
         public bool IsBooked { get; set; }
+
     }
 }
