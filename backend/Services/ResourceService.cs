@@ -2,9 +2,6 @@ using backend.Models;
 using backend.Repositories;
 using InnoviaHub_Grupp5.Models.DTOs;
 using InnoviaHub_Grupp5.Services;
-using Microsoft.AspNetCore.Mvc;
-
-
 
 namespace backend.Services
 {

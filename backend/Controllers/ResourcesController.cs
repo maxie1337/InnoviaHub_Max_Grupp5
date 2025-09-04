@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using InnoviaHub_Grupp5.Services;
 using InnoviaHub_Grupp5.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace backend.Controllers
@@ -47,8 +48,8 @@ namespace backend.Controllers
                 return BadRequest(ModelState);
 
             var created = await _service.CreateAsync(dto);
-            
-            
+
+
             return CreatedAtAction(nameof(GetById), new { id = created.ResourceId }, created);
         }
 
