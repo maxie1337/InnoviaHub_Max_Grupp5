@@ -10,13 +10,13 @@ using InnoviaHub_Grupp5.Models.DTOs;
 
 namespace backend.Controllers
 {
-   [ApiController]
+    [ApiController]
     [Route("api/[controller]")]
-    public class ResourceController : ControllerBase
+    public class ResourcesController : ControllerBase
     {
         private readonly IResourceService _service;
 
-        public ResourceController(IResourceService service)
+        public ResourcesController(IResourceService service)
         {
             _service = service;
         }
@@ -39,13 +39,17 @@ namespace backend.Controllers
 
         // POST: api/resource
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ResourceDTO dto)
+        public async Task<ActionResult> Create(ResourceDTO dto)
         {
+            if (dto == null)
+                return BadRequest("Resource data is required.");
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created }, created);
+            
+            
+            return CreatedAtAction(nameof(GetById), new { id = created.ResourceId }, created);
         }
 
         // PUT: api/resource/{id}
@@ -76,7 +80,7 @@ namespace backend.Controllers
 /// </summary>/
 
 
-   /* [ApiController]
+    /*[ApiController]
     [Route("api/[controller]")]
     public class ResourcesController : ControllerBase
     {

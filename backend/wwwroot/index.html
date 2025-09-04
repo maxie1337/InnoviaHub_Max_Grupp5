@@ -402,17 +402,18 @@
 
 // CREATE
 async function createResource() {
-    const resource = {
+    const resource = {        
         type: parseInt(document.getElementById('resourceType').value),
         isBooked: document.getElementById('isBooked').value === 'true'
     };
-
+    console.log('Creating resource:', resource);
     try {
         const response = await fetch(`${API_BASE}/resources`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(resource)
         });
+        console.log('Response status:', response.status);
         const result = await response.json();
         showResponse('resourceResponse', result, response.ok);
     } catch (error) {

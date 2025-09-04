@@ -1,8 +1,12 @@
+
+using backend.Models;
+
 namespace InnoviaHub_Grupp5.Models.DTOs
 {
     public class ResourceDTO
-    {        
-        public string Type { get; set; } = string.Empty; 
+    {
+        public int ResourceId { get; set; }
+        public ResourceType Type { get; set; }
         public bool IsBooked { get; set; }
     }
 }
