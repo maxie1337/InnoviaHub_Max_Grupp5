@@ -9,6 +9,7 @@ using System.Text;
 using backend.Repositories;
 using InnoviaHub_Grupp5.Services;
 using backend.Services;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>
@@ -65,6 +68,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     // Development configuration
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
