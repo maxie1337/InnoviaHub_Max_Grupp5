@@ -23,6 +23,7 @@ namespace backend.Controllers
         }
 
         // GET: api/resource
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
