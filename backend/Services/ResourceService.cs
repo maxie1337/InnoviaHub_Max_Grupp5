@@ -2,6 +2,7 @@ using backend.Models;
 using backend.Repositories;
 using InnoviaHub_Grupp5.Models.DTOs;
 using InnoviaHub_Grupp5.Services;
+using System.Linq;
 
 namespace backend.Services
 {
@@ -32,7 +33,7 @@ namespace backend.Services
             if (resource == null) return null;
             return new ResourceDTO
             {
-                //ResourceId = id,
+                ResourceId = resource.ResourceId,
                 Type = resource.Type,
                 IsBooked = resource.IsBooked
             };
@@ -42,7 +43,6 @@ namespace backend.Services
         {
             var resource = new Resource
             {
-                //ResourceId = dto.ResourceId,
                 Type = dto.Type,
                 IsBooked = dto.IsBooked
             };
@@ -50,7 +50,7 @@ namespace backend.Services
             
             return new ResourceDTO
             {
-                //ResourceId = created.ResourceId,
+                ResourceId = created.ResourceId,
                 Type = created.Type,
                 IsBooked = created.IsBooked
             };
