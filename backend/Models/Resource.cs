@@ -1,5 +1,3 @@
-using System;
-
 namespace backend.Models;
 
 public enum ResourceType
@@ -7,7 +5,8 @@ public enum ResourceType
     DropInDesk,
     MeetingRoom,
     VRset,
-    AIserver
+    AIserver,
+    newResource
 }
 
 public class Resource
