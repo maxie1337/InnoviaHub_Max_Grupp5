@@ -1,23 +1,29 @@
-using Microsoft.EntityFrameworkCore;
 using backend.Data;
-using Microsoft.AspNetCore.Identity;
+using backend.Mapping;
 using backend.Models;
+using backend.Repositories;
+using backend.Services;
 using backend.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using backend.Repositories;
-using InnoviaHub_Grupp5.Services;
-using backend.Services;
-
 using Scalar.AspNetCore;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<IResourceService, ResourceService>();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>          // Add a JSON converter to serialize/deserialize enum values as camelCase strings
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    });
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -33,7 +39,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-
+// Add AutoMapper
+builder.Services.AddAutoMapper(cfg => { }, typeof(ResourceMappingProfile));
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>

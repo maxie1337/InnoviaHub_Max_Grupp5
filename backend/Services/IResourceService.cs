@@ -1,14 +1,14 @@
 // Services/IResourceService.cs
-using InnoviaHub_Grupp5.Models.DTOs;
+using backend.Models.DTOs.Resource;
 
-namespace InnoviaHub_Grupp5.Services
+namespace backend.Services
 {
     public interface IResourceService
     {
-        Task<IEnumerable<ResourceDTO>> GetAllAsync();
-        Task<ResourceDTO?> GetByIdAsync(int id);
-        Task<ResourceDTO> CreateAsync(ResourceDTO dto);
-        Task<ResourceDTO?> UpdateAsync(int id, ResourceDTO dto);
+        Task<IEnumerable<ResourceResDTO>> GetAllAsync();
+        Task<ResourceResDTO?> GetByIdAsync(int id);
+        Task<ResourceResDTO> CreateAsync(ResourceReqDTO dto);
+        Task<ResourceResDTO?> UpdateAsync(int id, ResourceDTO dto);
         Task<bool> DeleteAsync(int id);
     }
 }

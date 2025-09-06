@@ -1,8 +1,7 @@
+using AutoMapper;
 using backend.Models;
+using backend.Models.DTOs.Resource;
 using backend.Repositories;
-using InnoviaHub_Grupp5.Models.DTOs;
-using InnoviaHub_Grupp5.Services;
-using System.Linq;
 
 namespace backend.Services
 {
@@ -10,67 +9,62 @@ namespace backend.Services
     public class ResourceService : IResourceService
     {
         private readonly IResourceRepository _repository;
+        private readonly IMapper _mapper;
 
-        public ResourceService(IResourceRepository repository)
+        public ResourceService(IResourceRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ResourceDTO>> GetAllAsync()
+        public async Task<IEnumerable<ResourceResDTO>> GetAllAsync()
         {
             var resources = await _repository.GetAllAsync();
-            return resources.Select(r => new ResourceDTO
-            {
-                ResourceId = r.ResourceId,
-                Type = r.Type,
-                IsBooked = r.IsBooked
-            });
+
+            // Map Resource --> ResourceResDTO
+            return _mapper.Map<IEnumerable<ResourceResDTO>>(resources);
         }
 
-        public async Task<ResourceDTO?> GetByIdAsync(int id)
+        public async Task<ResourceResDTO?> GetByIdAsync(int id)
         {
             var resource = await _repository.GetByIdAsync(id);
+
             if (resource == null) return null;
-            return new ResourceDTO
-            {
-                ResourceId = resource.ResourceId,
-                Type = resource.Type,
-                IsBooked = resource.IsBooked
-            };
+
+            // Map Resource --> ResourceDTO
+            return _mapper.Map<ResourceResDTO>(resource);
         }
 
-        public async Task<ResourceDTO> CreateAsync(ResourceDTO dto)
+        public async Task<ResourceResDTO> CreateAsync(ResourceReqDTO dto)
         {
-            var resource = new Resource
-            {
-                Type = dto.Type,
-                IsBooked = dto.IsBooked
-            };
+            // Map ResourceReqDTO --> Resource
+            var resource = _mapper.Map<Resource>(dto);
+
+            resource.IsBooked = false; // When created always false
+
+            // Save to repository
             var created = await _repository.CreateAsync(resource);
-            
-            return new ResourceDTO
-            {
-                ResourceId = created.ResourceId,
-                Type = created.Type,
-                IsBooked = created.IsBooked
-            };
+
+            // Map Resource --> ResourceResDTO
+            return _mapper.Map<ResourceResDTO>(created);
         }
 
-        public async Task<ResourceDTO?> UpdateAsync(int id, ResourceDTO dto)
+        public async Task<ResourceResDTO?> UpdateAsync(int id, ResourceDTO dto)
         {
             var resource = await _repository.GetByIdAsync(id);
+
             if (resource == null) return null;
 
-            resource.Type = dto.Type;
-            resource.IsBooked = dto.IsBooked;
+            if (dto.Type.HasValue)
+                resource.Type = dto.Type.Value;
+
+            if (dto.IsBooked.HasValue)
+                resource.IsBooked = dto.IsBooked.Value;
+
             var updated = await _repository.UpdateAsync(resource);
 
-            return new ResourceDTO
-            {
-                ResourceId = id,
-                Type = updated.Type,
-                IsBooked = updated.IsBooked
-            };
+            // Map updated Resource --> ResourceResDTO
+            return _mapper.Map<ResourceResDTO>(updated);
         }
 
         public async Task<bool> DeleteAsync(int id)
