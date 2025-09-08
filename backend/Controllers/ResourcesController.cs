@@ -80,6 +80,9 @@ namespace backend.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
+                if (dto.Name != null && string.IsNullOrWhiteSpace(dto.Name))
+                    return BadRequest(new { error = "Name cannot be empty." });
+
                 var updated = await _service.UpdateAsync(id, dto);
                 return updated == null ? NotFound(new { error = "Resource not found" }) : Ok(updated);
             }

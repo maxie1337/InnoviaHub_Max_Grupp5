@@ -5,7 +5,7 @@ using backend.Repositories;
 
 namespace backend.Services
 {
-    
+
     public class ResourceService : IResourceService
     {
         private readonly IResourceRepository _repository;
@@ -37,10 +37,12 @@ namespace backend.Services
 
         public async Task<ResourceResDTO> CreateAsync(ResourceReqDTO dto)
         {
-            // Map ResourceReqDTO --> Resource
-            var resource = _mapper.Map<Resource>(dto);
-
-            resource.IsBooked = false; // When created always false
+            var resource = new Resource
+            {
+                ResourceTypeId = dto.ResourceTypeId,
+                Name = dto.Name,
+                IsBooked = false
+            };
 
             // Save to repository
             var created = await _repository.CreateAsync(resource);
@@ -53,10 +55,11 @@ namespace backend.Services
         {
             var resource = await _repository.GetByIdAsync(id);
 
-            if (resource == null) return null;
+            if (dto.ResourceTypeId.HasValue)
+                resource.ResourceTypeId = dto.ResourceTypeId.Value;
 
-            if (dto.Type.HasValue)
-                resource.Type = dto.Type.Value;
+            if (!string.IsNullOrEmpty(dto.Name))
+                resource.Name = dto.Name;
 
             if (dto.IsBooked.HasValue)
                 resource.IsBooked = dto.IsBooked.Value;
