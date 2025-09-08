@@ -1,10 +1,13 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace backend.Models.DTOs.Resource
 {
     public class ResourceReqDTO
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))] // Serializes enum as string in JSON
-        public ResourceType Type { get; set; }
+        [Required]
+        public int ResourceTypeId { get; set; }
+
+        [Required(ErrorMessage = "Name is required")]
+        public string Name { get; set; } = null!;
     }
 }

@@ -15,12 +15,16 @@ namespace backend.Repositories
 
         public async Task<IEnumerable<Resource>> GetAllAsync()
         {
-            return await _context.Resources.ToListAsync();
+            return await _context.Resources
+                .Include(r => r.ResourceType)
+                .ToListAsync();
         }
 
         public async Task<Resource> GetByIdAsync(int id)
         {
-            return await _context.Resources.FindAsync(id);
+            return await _context.Resources
+                .Include(r => r.ResourceType)
+                .FirstOrDefaultAsync(r => r.ResourceId == id);
         }
 
         public async Task<Resource> CreateAsync(Resource resource)
