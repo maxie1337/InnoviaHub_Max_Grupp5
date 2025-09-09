@@ -6,15 +6,15 @@ namespace backend.Models;
 public class Booking
 {
     public int BookingId { get; set; }
-    public required string Status { get; set; } //booked, cancelled, expired
+    public required bool IsActive { get; set; }
     public DateTime BookingDate { get; set; }
     public DateTime EndDate { get; set; }
 
     [ForeignKey("UserId")]
-    public required AppUser User { get; set; }
-    public int UserId { get; set; }
+    public ApplicationUser? User { get; set; }
+    public string UserId { get; set; } = string.Empty;
 
     [ForeignKey("ResourceId")]
-    public required Resource Resource { get; set; }
+    public Resource? Resource { get; set; }
     public int ResourceId { get; set; }
 }

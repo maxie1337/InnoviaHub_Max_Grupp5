@@ -1,0 +1,87 @@
+using System;
+using backend.Data;
+using backend.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+
+namespace backend.Repositories;
+
+public class BookingRepository : IBookingRepository
+{
+    private readonly ApplicationDbContext _context;
+
+    public BookingRepository(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<IEnumerable<Booking>> GetAllAsync()
+    {
+        return await _context.Bookings
+        .Include(b => b.Resource)
+        .Include(b => b.User)
+        .ToListAsync();
+    }
+
+    public async Task<Booking> GetByIdAsync(int BookingId)
+    {
+        var result = await _context.Bookings
+        .Include(b => b.Resource)
+        .Include(b => b.User)
+        .FirstOrDefaultAsync(b => b.BookingId == BookingId);
+        
+        return result;
+    }
+
+    /*public async Task<IEnumerable<Booking>> GetUserBookingsAsync(string UserId)
+    {
+    
+    }*/
+
+    public async Task<Booking> CreateAsync(Booking booking)
+    {
+        _context.Bookings.Add(booking);
+        await _context.SaveChangesAsync();
+        return booking;
+    }
+
+    public async Task<Booking> UpdateAsync(Booking booking)
+    {
+        _context.Entry(booking).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return booking;
+    }
+
+    public async Task<string> CancelBookingAsync(int BookingId)
+    {
+        var booking = _context.Bookings.FirstOrDefault(b => b.BookingId == BookingId);
+        if (booking == null)
+        {
+            return "BookingNotFound";
+        }
+        else if (booking.IsActive == false)
+        {
+            return "BookingHasExpired";
+        }
+
+        booking.IsActive = false;
+        await _context.SaveChangesAsync();
+
+        return "Success";
+    }
+    
+    public async Task<bool> DeleteAsync(int BookingId)
+    {
+        var booking = await _context.Bookings.FindAsync(BookingId);
+        if (booking != null)
+        {
+            _context.Bookings.Remove(booking);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
