@@ -1,6 +1,6 @@
 using System;
 using backend.Models;
-using InnoviaHub_Grupp5.Models.DTOs;
+using backend.Models.DTOs;
 
 namespace backend.Services;
 

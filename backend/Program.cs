@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Hubs;
 using backend.Mapping;
 using backend.Models;
 using backend.Repositories;
@@ -91,7 +92,7 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedRolesAndUsersAsync(roleManager, userManager);
 }
 
-
+app.MapHub<BookingHub>("/bookingHub");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
