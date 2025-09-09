@@ -2,7 +2,7 @@ using System;
 using backend.Data;
 using backend.Models;
 using backend.Repositories;
-using InnoviaHub_Grupp5.Models.DTOs;
+using backend.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;

@@ -20,14 +20,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<IResourceService, ResourceService>();
 builder.Services.AddControllers()
-    .AddJsonOptions(options =>          // Add a JSON converter to serialize/deserialize enum values as camelCase strings
+    .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(
             new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
     });
 
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
 // Add Entity Framework
@@ -65,10 +64,24 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Cors implementation for frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // Add Authorization
 builder.Services.AddAuthorization();
 
 builder.Services.AddOpenApi();
+
+builder.Services.AddSignalR();
 
 // Add JWT Token Manager
 builder.Services.AddScoped<IJwtTokenManager, JwtTokenManager>();
@@ -92,11 +105,12 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedRolesAndUsersAsync(roleManager, userManager);
 }
 
-app.MapHub<BookingHub>("/bookingHub");
+app.UseCors("FrontendPolicy");
+app.MapHub<BookingHub>("/bookingHub").RequireCors("FrontendPolicy");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
-app.MapControllers();
+app.MapControllers().RequireCors("FrontendPolicy");
 app.MapFallbackToFile("index.html");
 app.Run();

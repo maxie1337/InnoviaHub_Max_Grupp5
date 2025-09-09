@@ -12,7 +12,7 @@ namespace backend.Data
             Database.EnsureCreated();
         }
 
-        public DbSet<ApplicationUser> Users { get; set; }
+        public DbSet<ApplicationUser> AppUsers { get; set; }
         public DbSet<ResourceType> ResourceTypes { get; set; }
         public DbSet<Resource> Resources { get; set; }
         public DbSet<Booking> Bookings { get; set; }

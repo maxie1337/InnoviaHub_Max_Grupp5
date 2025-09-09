@@ -579,15 +579,15 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Bookings");
-                }
-                
+                });
+
             modelBuilder.Entity("backend.Models.Resource", b =>
                 {
                     b.HasOne("backend.Models.ResourceType", "ResourceType")
-                        .WithMany("Resources")
-                        .HasForeignKey("ResourceTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                       .WithMany("Resources")
+                       .HasForeignKey("ResourceTypeId")
+                       .OnDelete(DeleteBehavior.Cascade)
+                       .IsRequired();
 
                     b.Navigation("ResourceType");
                 });
