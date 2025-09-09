@@ -1,4 +1,4 @@
-namespace InnoviaHub_Grupp5.Models.DTOs
+namespace backend.Models.DTOs
 {
     public class BookingDTO
     {
