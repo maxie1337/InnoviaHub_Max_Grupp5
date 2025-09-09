@@ -1,11 +1,14 @@
 using System.Security.Claims;
 using backend.Models;
 using backend.Services;
-using InnoviaHub_Grupp5.Models.DTOs;
+using backend.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using backend.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace backend.Controllers
 {
@@ -15,9 +18,12 @@ namespace backend.Controllers
     {
         private readonly IBookingService _service;
 
-        public BookingController(IBookingService service)
+        private readonly IHubContext<BookingHub> _hubContext;
+
+        public BookingController(IBookingService service, IHubContext<BookingHub> hubContext)
         {
             _service = service;
+            _hubContext = hubContext;
         }
 
         [Authorize(Roles = "Admin")]
@@ -56,6 +62,8 @@ namespace backend.Controllers
             
             var created = await _service.CreateAsync(userId, dto);
 
+            await _hubContext.Clients.All.SendAsync("Booking Created", created);
+
             return Ok(created);
         }
 
@@ -66,6 +74,8 @@ namespace backend.Controllers
                 return BadRequest(ModelState);
 
             var updated = await _service.UpdateAsync(booking);
+
+             await _hubContext.Clients.All.SendAsync("Booking Updated", updated);
             return updated == null ? NotFound() : Ok(updated);
         }
 
@@ -85,6 +95,7 @@ namespace backend.Controllers
             }
             else
             {
+                 await _hubContext.Clients.All.SendAsync("Booking Cancelled", result);
                 return Ok(result);
             }
         }
@@ -96,6 +107,7 @@ namespace backend.Controllers
             var result = await _service.DeleteAsync(BookingId);
             if (result == true)
             {
+                await _hubContext.Clients.All.SendAsync("Booking Deleted", true);
                 return Ok();
             }
             else
