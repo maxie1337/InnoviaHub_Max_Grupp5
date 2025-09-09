@@ -6,9 +6,10 @@ namespace backend.Repositories;
 public interface IBookingRepository
 {
     Task<IEnumerable<Booking>> GetAllAsync();
-    Task<IEnumerable<Booking>> GetUserBookingsAsync(string id);
+    Task<Booking> GetByIdAsync(int BookingId);
+    //Task<IEnumerable<Booking>> GetUserBookingsAsync(string id);
     Task<Booking> CreateAsync(Booking booking);
     Task<Booking> UpdateAsync(Booking booking);
-    Task<bool> CancelBookingAsync(int id);
-    Task<bool> DeleteAsync(int id);
+    Task<string> CancelBookingAsync(int BookingId);
+    Task<bool> DeleteAsync(int BookingId);
 }

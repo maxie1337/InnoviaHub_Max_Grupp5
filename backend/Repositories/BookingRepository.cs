@@ -17,7 +17,20 @@ public class BookingRepository : IBookingRepository
 
     public async Task<IEnumerable<Booking>> GetAllAsync()
     {
-        return await _context.Bookings.ToListAsync();
+        return await _context.Bookings
+        .Include(b => b.Resource)
+        .Include(b => b.User)
+        .ToListAsync();
+    }
+
+    public async Task<Booking> GetByIdAsync(int BookingId)
+    {
+        var result = await _context.Bookings
+        .Include(b => b.Resource)
+        .Include(b => b.User)
+        .FirstOrDefaultAsync(b => b.BookingId == BookingId);
+        
+        return result;
     }
 
     /*public async Task<IEnumerable<Booking>> GetUserBookingsAsync(string UserId)
@@ -39,23 +52,27 @@ public class BookingRepository : IBookingRepository
         return booking;
     }
 
-    public async Task<bool> CancelBookingAsync(int id)
+    public async Task<string> CancelBookingAsync(int BookingId)
     {
-        var booking = _context.Bookings.FirstOrDefault(b => b.BookingId == id);
+        var booking = _context.Bookings.FirstOrDefault(b => b.BookingId == BookingId);
         if (booking == null)
         {
-            return false;
+            return "BookingNotFound";
+        }
+        else if (booking.IsActive == false)
+        {
+            return "BookingHasExpired";
         }
 
         booking.IsActive = false;
         await _context.SaveChangesAsync();
 
-        return true;
+        return "Success";
     }
     
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int BookingId)
     {
-        var booking = await _context.Bookings.FindAsync(id);
+        var booking = await _context.Bookings.FindAsync(BookingId);
         if (booking != null)
         {
             _context.Bookings.Remove(booking);
@@ -63,6 +80,8 @@ public class BookingRepository : IBookingRepository
             return true;
         }
         else
+        {
             return false;
+        }
     }
 }
