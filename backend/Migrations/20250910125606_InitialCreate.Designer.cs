@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250907162523_migration1")]
-    partial class migration1
+    [Migration("20250910125606_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -286,12 +286,227 @@ namespace backend.Migrations
                     b.Property<bool>("IsBooked")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("Type")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("ResourceTypeId")
                         .HasColumnType("int");
 
                     b.HasKey("ResourceId");
 
+                    b.HasIndex("ResourceTypeId");
+
                     b.ToTable("Resources");
+
+                    b.HasData(
+                        new
+                        {
+                            ResourceId = 1,
+                            IsBooked = false,
+                            Name = "Desk #1",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 2,
+                            IsBooked = false,
+                            Name = "Desk #2",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 3,
+                            IsBooked = false,
+                            Name = "Desk #3",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 4,
+                            IsBooked = false,
+                            Name = "Desk #4",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 5,
+                            IsBooked = false,
+                            Name = "Desk #5",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 6,
+                            IsBooked = false,
+                            Name = "Desk #6",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 7,
+                            IsBooked = false,
+                            Name = "Desk #7",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 8,
+                            IsBooked = false,
+                            Name = "Desk #8",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 9,
+                            IsBooked = false,
+                            Name = "Desk #9",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 10,
+                            IsBooked = false,
+                            Name = "Desk #10",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 11,
+                            IsBooked = false,
+                            Name = "Desk #11",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 12,
+                            IsBooked = false,
+                            Name = "Desk #12",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 13,
+                            IsBooked = false,
+                            Name = "Desk #13",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 14,
+                            IsBooked = false,
+                            Name = "Desk #14",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 15,
+                            IsBooked = false,
+                            Name = "Desk #15",
+                            ResourceTypeId = 1
+                        },
+                        new
+                        {
+                            ResourceId = 101,
+                            IsBooked = false,
+                            Name = "Meeting Room 1",
+                            ResourceTypeId = 2
+                        },
+                        new
+                        {
+                            ResourceId = 102,
+                            IsBooked = false,
+                            Name = "Meeting Room 2",
+                            ResourceTypeId = 2
+                        },
+                        new
+                        {
+                            ResourceId = 103,
+                            IsBooked = false,
+                            Name = "Meeting Room 3",
+                            ResourceTypeId = 2
+                        },
+                        new
+                        {
+                            ResourceId = 104,
+                            IsBooked = false,
+                            Name = "Meeting Room 4",
+                            ResourceTypeId = 2
+                        },
+                        new
+                        {
+                            ResourceId = 201,
+                            IsBooked = false,
+                            Name = "VR Headset 1",
+                            ResourceTypeId = 3
+                        },
+                        new
+                        {
+                            ResourceId = 202,
+                            IsBooked = false,
+                            Name = "VR Headset 2",
+                            ResourceTypeId = 3
+                        },
+                        new
+                        {
+                            ResourceId = 203,
+                            IsBooked = false,
+                            Name = "VR Headset 3",
+                            ResourceTypeId = 3
+                        },
+                        new
+                        {
+                            ResourceId = 204,
+                            IsBooked = false,
+                            Name = "VR Headset 4",
+                            ResourceTypeId = 3
+                        },
+                        new
+                        {
+                            ResourceId = 300,
+                            IsBooked = false,
+                            Name = "AI Server",
+                            ResourceTypeId = 4
+                        });
+                });
+
+            modelBuilder.Entity("backend.Models.ResourceType", b =>
+                {
+                    b.Property<int>("ResourceTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ResourceTypeId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("ResourceTypeId");
+
+                    b.ToTable("ResourceTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            ResourceTypeId = 1,
+                            Name = "DropInDesk"
+                        },
+                        new
+                        {
+                            ResourceTypeId = 2,
+                            Name = "MeetingRoom"
+                        },
+                        new
+                        {
+                            ResourceTypeId = 3,
+                            Name = "VRset"
+                        },
+                        new
+                        {
+                            ResourceTypeId = 4,
+                            Name = "AIserver"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -364,9 +579,25 @@ namespace backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("backend.Models.Resource", b =>
+                {
+                    b.HasOne("backend.Models.ResourceType", "ResourceType")
+                        .WithMany("Resources")
+                        .HasForeignKey("ResourceTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ResourceType");
+                });
+
             modelBuilder.Entity("backend.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Bookings");
+                });
+
+            modelBuilder.Entity("backend.Models.ResourceType", b =>
+                {
+                    b.Navigation("Resources");
                 });
 #pragma warning restore 612, 618
         }
