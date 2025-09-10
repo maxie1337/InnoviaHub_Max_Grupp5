@@ -35,10 +35,15 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(
             new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
 
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddScoped<IBookingService, BookingService>();
+
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // Add Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
