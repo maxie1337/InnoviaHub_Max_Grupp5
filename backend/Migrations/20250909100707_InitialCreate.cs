@@ -4,14 +4,19 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -44,6 +49,7 @@ namespace backend.Migrations
                     Role = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -71,6 +77,21 @@ namespace backend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ResourceTypes",
+                columns: table => new
+                {
+                    ResourceTypeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResourceTypes", x => x.ResourceTypeId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -201,6 +222,71 @@ namespace backend.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "Resources",
+                columns: table => new
+                {
+                    ResourceId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ResourceTypeId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsBooked = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Resources", x => x.ResourceId);
+                    table.ForeignKey(
+                        name: "FK_Resources_ResourceTypes_ResourceTypeId",
+                        column: x => x.ResourceTypeId,
+                        principalTable: "ResourceTypes",
+                        principalColumn: "ResourceTypeId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "ResourceTypes",
+                columns: new[] { "ResourceTypeId", "Name" },
+                values: new object[,]
+                {
+                    { 1, "DropInDesk" },
+                    { 2, "MeetingRoom" },
+                    { 3, "VRset" },
+                    { 4, "AIserver" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Resources",
+                columns: new[] { "ResourceId", "IsBooked", "Name", "ResourceTypeId" },
+                values: new object[,]
+                {
+                    { 1, false, "Desk #1", 1 },
+                    { 2, false, "Desk #2", 1 },
+                    { 3, false, "Desk #3", 1 },
+                    { 4, false, "Desk #4", 1 },
+                    { 5, false, "Desk #5", 1 },
+                    { 6, false, "Desk #6", 1 },
+                    { 7, false, "Desk #7", 1 },
+                    { 8, false, "Desk #8", 1 },
+                    { 9, false, "Desk #9", 1 },
+                    { 10, false, "Desk #10", 1 },
+                    { 11, false, "Desk #11", 1 },
+                    { 12, false, "Desk #12", 1 },
+                    { 13, false, "Desk #13", 1 },
+                    { 14, false, "Desk #14", 1 },
+                    { 15, false, "Desk #15", 1 },
+                    { 101, false, "Meeting Room 1", 2 },
+                    { 102, false, "Meeting Room 2", 2 },
+                    { 103, false, "Meeting Room 3", 2 },
+                    { 104, false, "Meeting Room 4", 2 },
+                    { 201, false, "VR Headset 1", 3 },
+                    { 202, false, "VR Headset 2", 3 },
+                    { 203, false, "VR Headset 3", 3 },
+                    { 204, false, "VR Headset 4", 3 },
+                    { 300, false, "AI Server", 4 }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -237,6 +323,11 @@ namespace backend.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Resources_ResourceTypeId",
+                table: "Resources",
+                column: "ResourceTypeId");
         }
 
         /// <inheritdoc />
@@ -258,10 +349,16 @@ namespace backend.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Resources");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "ResourceTypes");
         }
     }
 }
