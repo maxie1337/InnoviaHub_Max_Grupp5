@@ -102,7 +102,7 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedRolesAndUsersAsync(roleManager, userManager);
 }
 
-app.UseCors("AllowFrontend");
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
