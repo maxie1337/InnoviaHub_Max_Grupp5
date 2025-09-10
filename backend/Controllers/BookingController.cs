@@ -34,7 +34,7 @@ namespace backend.Controllers
             return Ok(bookings);
         }
 
-        [Authorize(Roles = "Member")]
+        [Authorize(Roles = "Admin, Member")]
         [HttpGet("{BookingId}")]
         public async Task<ActionResult> GetById(int BookingId)
         {
@@ -49,7 +49,7 @@ namespace backend.Controllers
             }
         }
 
-        [Authorize(Roles = "Member")]
+        [Authorize(Roles = "Admin, Member")]
         [HttpPost]
         public async Task<ActionResult> Create(BookingDTO dto)
         {
@@ -75,12 +75,12 @@ namespace backend.Controllers
 
             var updated = await _service.UpdateAsync(booking);
 
-             await _hubContext.Clients.All.SendAsync("Booking Updated", updated);
+            await _hubContext.Clients.All.SendAsync("Booking Updated", updated);
             return updated == null ? NotFound() : Ok(updated);
         }
 
-        [Authorize(Roles = "Member")]
-        [HttpPost]
+        [Authorize(Roles = "Admin, Member")]
+        [HttpPost("cancel/{BookingId}")]
         public async Task<ActionResult> CancelBooking(int BookingId)
         {
             var result = await _service.CancelBookingAsync(BookingId);
@@ -101,7 +101,7 @@ namespace backend.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPost("{BookingId}")]
+        [HttpPost("delete/{BookingId}")]
         public async Task<ActionResult> Delete(int BookingId)
         {
             var result = await _service.DeleteAsync(BookingId);
