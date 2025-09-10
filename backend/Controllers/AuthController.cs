@@ -67,9 +67,6 @@ namespace backend.Controllers
             // Add to Member role
             await _userManager.AddToRoleAsync(user, "Member");
 
-            // Generate JWT token
-            var token = _jwtTokenManager.GenerateToken(user);
-
             return Ok(new
             {
                 message = "User registered successfully",
@@ -81,8 +78,7 @@ namespace backend.Controllers
                     user.LastName,
                     user.Role,
                     user.IsActive
-                },
-                token = token
+                }
             });
         }
 
