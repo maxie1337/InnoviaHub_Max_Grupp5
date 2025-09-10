@@ -8,14 +8,14 @@ const LandingPage: React.FC = () => {
       
       {/* Hero Section */}
       <section className="hero">
-        <h1>Welcome to Innovia Hub</h1>
+        <h1 className="text-2xl font-bold mb-4">Welcome to Innovia Hub</h1>
         <p>Your gateway to innovative resource management.</p>
         
       </section>
 
       {/* About Section */}
       <section className="about">
-        <h2>About Innovia Hub</h2>
+        <h2 className="text-2xl font-bold mb-4">About Innovia Hub</h2>
         <p>
           Innovia Hub is designed to simplify and streamline resource management
           for teams and organizations. Easily book, track, and manage resources
