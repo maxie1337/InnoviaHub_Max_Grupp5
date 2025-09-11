@@ -402,3 +402,6 @@ FodyWeavers.xsd
 
 appsettings.Development.json
 appsettings.*.json
+
+# environment variables
+.env.*
