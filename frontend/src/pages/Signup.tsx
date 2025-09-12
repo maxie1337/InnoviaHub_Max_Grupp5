@@ -69,17 +69,19 @@ const Signup = () => {
                 position: "top-center",
             });
             navigate("/login");
-        } else {
-            toast.error("Något gick fel, försök igen.", {
-                position: "top-center",
-            });
         }
     };
     return (
-        <div className="flex flex-col min-h-screen items-center justify-center">
-            <div className="flex flex-col items-center justify-center py-8 px-6 bg-china_rose-900 border-2 rounded-xl mt-4 mx-4 gap-8">
-                <h1 className="text-3xl font-bold my-4">Skapa konto</h1>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col min-h-screen items-center justify-center bg-gradient-to-br from-oxford_blue-500 via-sapphire-500 to-yale_blue-500">
+            <div
+                className="flex flex-col items-center justify-center py-12 px-6 bg-oxford_blue-400/90 border border-oxford_blue-600 
+                rounded-2xl shadow-2xl mt-4 mx-4 max-w-md w-full backdrop-blur-md"
+            >
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex flex-col gap-8 w-full"
+                    noValidate
+                >
                     <FormInput
                         type="text"
                         name="firstName"
@@ -127,7 +129,7 @@ const Signup = () => {
                         validationRegex={
                             /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{8,}$/
                         }
-                        errorMessage="Minst 8 tecken, inklusive en bokstav och en siffra."
+                        errorMessage="Lösenordet måste vara minst 8 tecken, innehålla en bokstav, en siffra och ett specialtecken."
                     />
 
                     <FormInput
@@ -138,16 +140,17 @@ const Signup = () => {
                         placeholder="Bekräfta lösenord"
                         label="Bekräfta lösenord"
                         required
+                        errorMessage="Bekräfta lösenordet."
                     />
-
-                    <Button
-                        design="outline"
-                        className="bg-yellow_green-900 hover:bg-yellow_green-800"
-                        type="submit"
-                    >
-                        Skapa konto
-                    </Button>
-                    <p>
+                    <div className="flex justify-center my-6">
+                        <Button
+                            design="outline"
+                            className="text-white border-white hover:bg-sapphire-600"
+                        >
+                            Skapa konto
+                        </Button>
+                    </div>
+                    <p className="text-white">
                         Redan har du ett konto?{" "}
                         <span className="text-[#7a7a7a] cursor-pointer hover:text-black">
                             <Link to="/login">Logga in här.</Link>
