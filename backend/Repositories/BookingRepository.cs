@@ -19,7 +19,6 @@ public class BookingRepository : IBookingRepository
     {
         return await _context.Bookings
         .Include(b => b.Resource)
-        .Include(b => b.User)
         .ToListAsync();
     }
 
@@ -27,7 +26,6 @@ public class BookingRepository : IBookingRepository
     {
         var result = await _context.Bookings
         .Include(b => b.Resource)
-        .Include(b => b.User)
         .FirstOrDefaultAsync(b => b.BookingId == BookingId);
         
         return result;
@@ -52,12 +50,16 @@ public class BookingRepository : IBookingRepository
         return booking;
     }
 
-    public async Task<string> CancelBookingAsync(int BookingId)
+    public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
     {
         var booking = _context.Bookings.FirstOrDefault(b => b.BookingId == BookingId);
         if (booking == null)
         {
             return "BookingNotFound";
+        }
+        else if (!isAdmin && booking.UserId != UserId)
+        {
+            return "BookingBelongsToOtherUser";
         }
         else if (booking.IsActive == false)
         {

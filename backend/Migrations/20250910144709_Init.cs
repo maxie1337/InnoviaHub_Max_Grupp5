@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -254,19 +254,20 @@ namespace backend.Migrations
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     BookingDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    UserId = table.Column<string>(type: "varchar(255)", nullable: false)
+                    UserId = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ResourceId = table.Column<int>(type: "int", nullable: false)
+                    ResourceId = table.Column<int>(type: "int", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Bookings", x => x.BookingId);
                     table.ForeignKey(
-                        name: "FK_Bookings_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Bookings_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Bookings_Resources_ResourceId",
                         column: x => x.ResourceId,
@@ -356,14 +357,14 @@ namespace backend.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Bookings_ApplicationUserId",
+                table: "Bookings",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Bookings_ResourceId",
                 table: "Bookings",
                 column: "ResourceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Bookings_UserId",
-                table: "Bookings",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Resources_ResourceTypeId",

@@ -10,6 +10,6 @@ public interface IBookingService
     Task<Booking> GetByIdAsync(int BookingId);
     Task<Booking> CreateAsync(string UserId, BookingDTO dto);
     Task<Booking> UpdateAsync(Booking booking);
-    Task<string> CancelBookingAsync(int BookingId);
+    Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId);
     Task<bool> DeleteAsync(int BookingId);
 }

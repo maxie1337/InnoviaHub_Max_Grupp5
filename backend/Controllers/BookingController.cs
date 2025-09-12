@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using backend.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace backend.Controllers
 {
@@ -43,6 +44,10 @@ namespace backend.Controllers
             {
                 return NotFound();
             }
+            else if (!User.IsInRole("Admin") && result.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+            {
+                return Unauthorized("Bokningen tillhör en annan användare.");
+            }
             else
             {
                 return Ok(result);
@@ -67,6 +72,7 @@ namespace backend.Controllers
             return Ok(created);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] Booking booking)
         {
@@ -83,19 +89,21 @@ namespace backend.Controllers
         [HttpPost("cancel/{BookingId}")]
         public async Task<ActionResult> CancelBooking(int BookingId)
         {
-            var result = await _service.CancelBookingAsync(BookingId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+            var result = await _service.CancelBookingAsync(userId, isAdmin, BookingId);
 
             if (result == "BookingNotFound")
             {
                 return NotFound(result);
             }
-            else if (result == "BookingHasExpired")
+            else if (result == "BookingHasExpired" || result == "BookingBelongsToOtherUser")
             {
                 return Conflict(result);
             }
             else
             {
-                 await _hubContext.Clients.All.SendAsync("Booking Cancelled", result);
+                await _hubContext.Clients.All.SendAsync("Booking Cancelled", result);
                 return Ok(result);
             }
         }

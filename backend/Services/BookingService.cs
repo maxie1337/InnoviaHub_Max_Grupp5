@@ -46,9 +46,9 @@ public class BookingService : IBookingService
         return await _repository.UpdateAsync(booking);
     }
 
-    public async Task<string> CancelBookingAsync(int BookingId)
+    public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
     {
-        var result = await _repository.CancelBookingAsync(BookingId);
+        var result = await _repository.CancelBookingAsync(UserId, isAdmin, BookingId);
         return result;
     }
 
