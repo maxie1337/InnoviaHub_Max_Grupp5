@@ -64,9 +64,17 @@ namespace backend.Controllers
                 return BadRequest(ModelState);
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            var created = await _service.CreateAsync(userId, dto);
 
+            try
+            {
+                var test = await _service.CreateAsync(userId, dto);
+            }
+            catch (Exception e)
+            {
+                return Conflict(e);
+            }
+
+            var created = await _service.CreateAsync(userId, dto);
             await _hubContext.Clients.All.SendAsync("Booking Created", created);
 
             return Ok(created);

@@ -52,7 +52,10 @@ public class BookingRepository : IBookingRepository
 
     public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
     {
-        var booking = _context.Bookings.FirstOrDefault(b => b.BookingId == BookingId);
+        var booking = _context.Bookings
+        .Include(b => b.Resource)
+        .FirstOrDefault(b => b.BookingId == BookingId);
+
         if (booking == null)
         {
             return "BookingNotFound";
@@ -65,8 +68,14 @@ public class BookingRepository : IBookingRepository
         {
             return "BookingHasExpired";
         }
+        else if (booking.Resource == null)
+        {
+            return "Error";
+        }
 
         booking.IsActive = false;
+        booking.Resource.IsBooked = false;
+
         await _context.SaveChangesAsync();
 
         return "Success";

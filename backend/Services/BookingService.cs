@@ -4,16 +4,19 @@ using backend.Models;
 using backend.Repositories;
 using backend.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
+using backend.Models.DTOs.Resource;
 
 namespace backend.Services;
 
 public class BookingService : IBookingService
 {
     private readonly IBookingRepository _repository;
+    private readonly IResourceService _resourceService;
 
-    public BookingService(IBookingRepository repository)
+    public BookingService(IBookingRepository repository, IResourceService resourceService)
     {
         _repository = repository;
+        _resourceService = resourceService;
     }
 
     public async Task<IEnumerable<Booking>> GetAllAsync()
@@ -28,6 +31,27 @@ public class BookingService : IBookingService
 
     public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)
     {
+        var resource = await _resourceService.GetByIdAsync(dto.ResourceId);
+        if (resource == null)
+        {
+            throw new Exception("ResourceDoesntExist");
+        }
+        else if (resource.IsBooked == true)
+        {
+            throw new Exception("ResourceIsOccupied");
+        }
+        else
+        {
+            var resourceDTO = new ResourceDTO
+            {
+                ResourceTypeId = resource.ResourceTypeId,
+                Name = resource.Name,
+                IsBooked = true
+            };
+
+            await _resourceService.UpdateAsync(resource.ResourceId, resourceDTO);
+        }
+        
         var booking = new Booking
         {
             IsActive = true,
