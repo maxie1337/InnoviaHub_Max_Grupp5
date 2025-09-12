@@ -31,11 +31,6 @@ public class BookingRepository : IBookingRepository
         return result;
     }
 
-    /*public async Task<IEnumerable<Booking>> GetUserBookingsAsync(string UserId)
-    {
-    
-    }*/
-
     public async Task<Booking> CreateAsync(Booking booking)
     {
         _context.Bookings.Add(booking);
