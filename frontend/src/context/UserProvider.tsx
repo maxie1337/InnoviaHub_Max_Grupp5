@@ -18,12 +18,18 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     // State to store the JWT token
     const [token, setToken] = useState<string>("");
 
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        const storedToken = localStorage.getItem("token");
-        if (storedToken) {
-            setToken(storedToken);
-        }
-    }, []);
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+
+    if (storedToken) setToken(storedToken);
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    setLoading(false);
+}, []);
+
 
     // REGISTER
     const register = async (
@@ -63,6 +69,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         // Save token in localStorage so the session persists after refresh
         localStorage.setItem("token", result.data.token);
 
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            email,
+        })
+    );
+
         // Update the state with token and user data
         setToken(result.data.token);
         setUser({ email });
@@ -74,6 +87,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     const logout = () => {
         // Clears token from both state and localStorage
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
         setUser({ email: "" });
         setToken("");
 
@@ -94,6 +109,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         token,
         isAuthenticated,
     };
+
+    if (loading) return <p>Laddar användare...</p>;  
 
     return (
         <UserContext.Provider value={contextValue}>

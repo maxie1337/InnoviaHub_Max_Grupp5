@@ -4,12 +4,15 @@ import "./index.css";
 import App from "./App.tsx";
 import { Toaster } from "react-hot-toast";
 import { BrowserRouter } from "react-router";
+import { UserProvider } from "./context/UserProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <BrowserRouter>
+        <UserProvider>
             <Toaster />
             <App />
+        </UserProvider>
         </BrowserRouter>
     </StrictMode>
 );
