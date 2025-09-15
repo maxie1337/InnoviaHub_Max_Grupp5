@@ -27,7 +27,7 @@ namespace backend.Controllers
             _hubContext = hubContext;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Member")]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -58,7 +58,10 @@ namespace backend.Controllers
         [HttpGet("myBookings")]
         public async Task<ActionResult> GetMyBookings()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
             var result = await _service.GetMyBookingsAsync(userId);
             return Ok(result);
         }
@@ -73,10 +76,12 @@ namespace backend.Controllers
                 return BadRequest(ModelState);
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not found or not logged in.");
+            }
+            
             var created = await _service.CreateAsync(userId, dto);
-            await _hubContext.Clients.All.SendAsync("Booking Created", created);
-
             return Ok(created);
         }
 
@@ -89,7 +94,6 @@ namespace backend.Controllers
 
             var updated = await _service.UpdateAsync(booking);
 
-            await _hubContext.Clients.All.SendAsync("Booking Updated", updated);
             return updated == null ? NotFound() : Ok(updated);
         }
 
@@ -123,7 +127,6 @@ namespace backend.Controllers
             var result = await _service.DeleteAsync(BookingId);
             if (result == true)
             {
-                await _hubContext.Clients.All.SendAsync("Booking Deleted", true);
                 return Ok();
             }
             else

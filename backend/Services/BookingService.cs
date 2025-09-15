@@ -3,86 +3,143 @@ using backend.Data;
 using backend.Models;
 using backend.Repositories;
 using backend.Models.DTOs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using backend.Hubs;
 using backend.Models.DTOs.Resource;
 
-namespace backend.Services;
-
-public class BookingService : IBookingService
+namespace backend.Services
 {
-    private readonly IBookingRepository _repository;
-    private readonly IResourceService _resourceService;
-
-    public BookingService(IBookingRepository repository, IResourceService resourceService)
+    public class BookingService : IBookingService
     {
-        _repository = repository;
-        _resourceService = resourceService;
-    }
+        private readonly IBookingRepository _repository;
+        private readonly ApplicationDbContext _context;
+        private readonly IHubContext<BookingHub> _hubContext;
+        private readonly IResourceService _resourceService;
 
-    public async Task<IEnumerable<Booking>> GetAllAsync()
-    {
-        return await _repository.GetAllAsync();
-    }
-
-    public async Task<Booking> GetByIdAsync(int BookingId)
-    {
-        return await _repository.GetByIdAsync(BookingId);
-    }
-
-    public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId)
-    {
-        return await _repository.GetMyBookingsAsync(UserId);
-    }
-
-    public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)
-    {
-        var resource = await _resourceService.GetByIdAsync(dto.ResourceId);
-        if (resource == null)
+        public BookingService(
+            IBookingRepository repository,
+            ApplicationDbContext context,
+            IHubContext<BookingHub> hubContext,
+            IResourceService resourceService)
         {
-            throw new Exception("ResourceDoesntExist");
+            _repository = repository;
+            _context = context;
+            _hubContext = hubContext;
+            _resourceService = resourceService;
         }
-        else if (resource.IsBooked == true)
+
+        public async Task<IEnumerable<Booking>> GetAllAsync()
         {
-            throw new Exception("ResourceIsOccupied");
+            return await _repository.GetAllAsync();
         }
-        else
+        public async Task<IEnumerable<Booking>> GetBookingsForUserAsync(string userId)
         {
-            var resourceDTO = new ResourceDTO
+            return await _repository.GetByUserIdAsync(userId, includeInactive: true);
+        }
+
+        public async Task<Booking?> GetByIdAsync(int BookingId)
+        {
+            return await _repository.GetByIdAsync(BookingId);
+        }
+
+        public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId)
+        {
+            return await _repository.GetMyBookingsAsync(UserId);
+        }
+
+        public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)
+        {
+            var resource = await _resourceService.GetByIdAsync(dto.ResourceId);
+            if (resource == null)
             {
-                ResourceTypeId = resource.ResourceTypeId,
-                Name = resource.Name,
-                IsBooked = true
+                throw new Exception("ResourceDoesntExist");
+            }
+            else if (resource.IsBooked == true)
+            {
+                throw new Exception("ResourceIsOccupied");
+            }
+            else
+            {
+                var resourceDTO = new ResourceDTO
+                {
+                    ResourceTypeId = resource.ResourceTypeId,
+                    Name = resource.Name,
+                    IsBooked = true
+                };
+
+                await _resourceService.UpdateAsync(resource.ResourceId, resourceDTO);
+            }
+
+            var booking = new Booking
+            {
+                IsActive = true,
+                BookingDate = dto.BookingDate,
+                EndDate = dto.EndDate,
+                UserId = UserId,
+                ResourceId = dto.ResourceId
             };
 
-            await _resourceService.UpdateAsync(resource.ResourceId, resourceDTO);
+            var created = await _repository.CreateAsync(booking);
+
+            // Skicka SignalR-event
+            await _hubContext.Clients.All.SendAsync("ResourceUpdated", resource);
+            await _hubContext.Clients.All.SendAsync("BookingCreated", created);
+
+            return created;
         }
-
-        var booking = new Booking
-        {
-            IsActive = true,
-            BookingDate = dto.BookingDate,
-            EndDate = dto.EndDate,
-            UserId = UserId,
-            ResourceId = dto.ResourceId
-        };
-        var created = await _repository.CreateAsync(booking);
-
-        return created;
-    }
 
     public async Task<Booking> UpdateAsync(Booking booking)
     {
         return await _repository.UpdateAsync(booking);
     }
 
-    public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
-    {
-        var result = await _repository.CancelBookingAsync(UserId, isAdmin, BookingId);
-        return result;
-    }
+        public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
+        {
+            var booking = await _repository.GetByIdAsync(BookingId);
+            if (booking == null) return "BookingNotFound";
 
-    public async Task<bool> DeleteAsync(int BookingId)
-    {
-        return await _repository.DeleteAsync(BookingId);
+            // Markera resursen som ledig igen
+            var resource = await _context.Resources.FindAsync(booking.ResourceId);
+            if (resource != null)
+            {
+                resource.IsBooked = false;
+            }
+
+            var result = await _repository.CancelBookingAsync(UserId, isAdmin, BookingId);
+            await _context.SaveChangesAsync();
+
+            // Skicka SignalR-event
+            if (resource != null)
+                await _hubContext.Clients.All.SendAsync("ResourceUpdated", resource);
+
+            await _hubContext.Clients.All.SendAsync("BookingCancelled", booking.BookingId);
+
+            return result;
+        }
+
+        public async Task<bool> DeleteAsync(int BookingId)
+        {
+            var booking = await _repository.GetByIdAsync(BookingId);
+            if (booking == null) return false;
+
+            // Om bokningen fortfarande är aktiv, frigör resursen
+            var resource = await _context.Resources.FindAsync(booking.ResourceId);
+            if (resource != null)
+            {
+                resource.IsBooked = false;
+            }
+
+            var result = await _repository.DeleteAsync(BookingId);
+            await _context.SaveChangesAsync();
+
+            // Skicka SignalR-event
+            if (resource != null)
+                await _hubContext.Clients.All.SendAsync("ResourceUpdated", resource);
+
+            await _hubContext.Clients.All.SendAsync("BookingDeleted", BookingId);
+
+            return result;
+        }
     }
 }
