@@ -3,13 +3,9 @@ using backend.Models;
 using backend.Services;
 using backend.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using backend.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace backend.Controllers
 {
@@ -115,7 +111,6 @@ namespace backend.Controllers
             }
             else
             {
-                await _hubContext.Clients.All.SendAsync("Booking Cancelled", result);
                 return Ok(result);
             }
         }

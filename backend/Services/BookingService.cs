@@ -4,7 +4,6 @@ using backend.Models;
 using backend.Repositories;
 using backend.Models.DTOs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using backend.Hubs;
 using backend.Models.DTOs.Resource;
 
@@ -33,12 +32,8 @@ namespace backend.Services
         {
             return await _repository.GetAllAsync();
         }
-        public async Task<IEnumerable<Booking>> GetBookingsForUserAsync(string userId)
-        {
-            return await _repository.GetByUserIdAsync(userId, includeInactive: true);
-        }
 
-        public async Task<Booking?> GetByIdAsync(int BookingId)
+        public async Task<Booking> GetByIdAsync(int BookingId)
         {
             return await _repository.GetByIdAsync(BookingId);
         }
