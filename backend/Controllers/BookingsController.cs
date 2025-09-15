@@ -15,13 +15,13 @@ namespace backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BookingController : ControllerBase
+    public class BookingsController : ControllerBase
     {
         private readonly IBookingService _service;
 
         private readonly IHubContext<BookingHub> _hubContext;
 
-        public BookingController(IBookingService service, IHubContext<BookingHub> hubContext)
+        public BookingsController(IBookingService service, IHubContext<BookingHub> hubContext)
         {
             _service = service;
             _hubContext = hubContext;
