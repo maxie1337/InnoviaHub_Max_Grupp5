@@ -33,6 +33,21 @@ public class BookingRepository : IBookingRepository
         return result;
     }
 
+    public async Task<IEnumerable<Booking>> GetByUserIdAsync(string userId, bool includeInactive = true)
+{
+    var query = _context.Bookings
+        .Include(b => b.Resource)
+        .Include(b => b.User)
+        .AsQueryable();
+
+    query = query.Where(b => b.UserId == userId);
+
+    if (!includeInactive)
+        query = query.Where(b => b.IsActive);
+
+    return await query.ToListAsync();
+}
+
     /*public async Task<IEnumerable<Booking>> GetUserBookingsAsync(string UserId)
     {
     

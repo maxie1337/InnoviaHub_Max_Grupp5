@@ -16,16 +16,6 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173") // Replace with your frontend's URL/port
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
 
 // Add services to the container.
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();

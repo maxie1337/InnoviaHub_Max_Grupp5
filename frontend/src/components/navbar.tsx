@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
                 <Link to="/" className="navbar-link">
                     Home
                 </Link>
-                <Link to="/booking" className="navbar-link">
+                <Link to="/bookings" className="navbar-link">
                     Booking
                 </Link>
                 {token ? (

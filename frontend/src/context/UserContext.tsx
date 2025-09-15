@@ -3,9 +3,10 @@ import type { Dispatch, SetStateAction } from "react";
 
 // Define the user object type
 export type User = {
+    id?: string;
     username?: string;
     email: string;
-    // role?: "admin" | "medlem";
+    role?: "admin" | "medlem";
 };
 
 // Define everything that will be available in the UserContext
