@@ -55,6 +55,14 @@ namespace backend.Controllers
         }
 
         [Authorize(Roles = "Admin, Member")]
+        [HttpGet("myBookings")]
+        public async Task<ActionResult> GetMyBookings(string UserId)
+        {
+            var result = await _service.GetMyBookingsAsync(UserId);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin, Member")]
         [HttpPost]
         public async Task<ActionResult> Create(BookingDTO dto)
         {

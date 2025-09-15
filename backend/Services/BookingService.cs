@@ -29,6 +29,11 @@ public class BookingService : IBookingService
         return await _repository.GetByIdAsync(BookingId);
     }
 
+    public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId)
+    {
+        return await _repository.GetMyBookingsAsync(UserId);
+    }
+
     public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)
     {
         var resource = await _resourceService.GetByIdAsync(dto.ResourceId);
@@ -51,7 +56,7 @@ public class BookingService : IBookingService
 
             await _resourceService.UpdateAsync(resource.ResourceId, resourceDTO);
         }
-        
+
         var booking = new Booking
         {
             IsActive = true,

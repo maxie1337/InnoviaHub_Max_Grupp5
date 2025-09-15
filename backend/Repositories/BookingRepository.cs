@@ -31,6 +31,14 @@ public class BookingRepository : IBookingRepository
         return result;
     }
 
+    public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId)
+    {
+        return await _context.Bookings
+        .Include(b => b.Resource)
+        .Where(b => b.UserId == UserId)
+        .ToListAsync();
+    }
+
     public async Task<Booking> CreateAsync(Booking booking)
     {
         _context.Bookings.Add(booking);
