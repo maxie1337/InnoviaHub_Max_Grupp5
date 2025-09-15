@@ -4,8 +4,8 @@ using backend.Models;
 using backend.Repositories;
 using backend.Models.DTOs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using backend.Hubs;
+using backend.Models.DTOs.Resource;
 
 namespace backend.Services
 {
@@ -14,43 +14,57 @@ namespace backend.Services
         private readonly IBookingRepository _repository;
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<BookingHub> _hubContext;
+        private readonly IResourceService _resourceService;
 
         public BookingService(
             IBookingRepository repository,
             ApplicationDbContext context,
-            IHubContext<BookingHub> hubContext)
+            IHubContext<BookingHub> hubContext,
+            IResourceService resourceService)
         {
             _repository = repository;
             _context = context;
             _hubContext = hubContext;
+            _resourceService = resourceService;
         }
 
         public async Task<IEnumerable<Booking>> GetAllAsync()
         {
             return await _repository.GetAllAsync();
         }
-        public async Task<IEnumerable<Booking>> GetBookingsForUserAsync(string userId)
-        {
-            return await _repository.GetByUserIdAsync(userId, includeInactive: true);
-        }
 
-        public async Task<Booking?> GetByIdAsync(int BookingId)
+        public async Task<Booking> GetByIdAsync(int BookingId)
         {
             return await _repository.GetByIdAsync(BookingId);
         }
 
+        public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId)
+        {
+            return await _repository.GetMyBookingsAsync(UserId);
+        }
+
         public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)
         {
-            // Hämta resursen
-            var resource = await _context.Resources.FindAsync(dto.ResourceId);
+            var resource = await _resourceService.GetByIdAsync(dto.ResourceId);
             if (resource == null)
-                throw new Exception("Resource not found");
+            {
+                throw new Exception("ResourceDoesntExist");
+            }
+            else if (resource.IsBooked == true)
+            {
+                throw new Exception("ResourceIsOccupied");
+            }
+            else
+            {
+                var resourceDTO = new ResourceDTO
+                {
+                    ResourceTypeId = resource.ResourceTypeId,
+                    Name = resource.Name,
+                    IsBooked = true
+                };
 
-            if (resource.IsBooked)
-                throw new Exception("Resource already booked");
-
-            // Markera resursen som bokad
-            resource.IsBooked = true;
+                await _resourceService.UpdateAsync(resource.ResourceId, resourceDTO);
+            }
 
             var booking = new Booking
             {
@@ -63,9 +77,6 @@ namespace backend.Services
 
             var created = await _repository.CreateAsync(booking);
 
-            // Spara ändringar för resurs
-            await _context.SaveChangesAsync();
-
             // Skicka SignalR-event
             await _hubContext.Clients.All.SendAsync("ResourceUpdated", resource);
             await _hubContext.Clients.All.SendAsync("BookingCreated", created);
@@ -73,17 +84,12 @@ namespace backend.Services
             return created;
         }
 
-        public async Task<Booking?> UpdateAsync(Booking booking)
-        {
-            var updated = await _repository.UpdateAsync(booking);
-            if (updated != null)
-            {
-                await _hubContext.Clients.All.SendAsync("BookingUpdated", updated);
-            }
-            return updated;
-        }
+    public async Task<Booking> UpdateAsync(Booking booking)
+    {
+        return await _repository.UpdateAsync(booking);
+    }
 
-        public async Task<string> CancelBookingAsync(int BookingId)
+        public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
         {
             var booking = await _repository.GetByIdAsync(BookingId);
             if (booking == null) return "BookingNotFound";
@@ -95,7 +101,7 @@ namespace backend.Services
                 resource.IsBooked = false;
             }
 
-            var result = await _repository.CancelBookingAsync(BookingId);
+            var result = await _repository.CancelBookingAsync(UserId, isAdmin, BookingId);
             await _context.SaveChangesAsync();
 
             // Skicka SignalR-event

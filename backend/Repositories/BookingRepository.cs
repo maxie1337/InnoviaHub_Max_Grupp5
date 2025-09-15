@@ -1,7 +1,6 @@
 using System;
 using backend.Data;
 using backend.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repositories;
@@ -19,7 +18,6 @@ public class BookingRepository : IBookingRepository
     {
         return await _context.Bookings
         .Include(b => b.Resource)
-        .Include(b => b.User)
         .ToListAsync();
     }
 
@@ -27,31 +25,18 @@ public class BookingRepository : IBookingRepository
     {
         var result = await _context.Bookings
         .Include(b => b.Resource)
-        .Include(b => b.User)
         .FirstOrDefaultAsync(b => b.BookingId == BookingId);
         
         return result;
     }
 
-    public async Task<IEnumerable<Booking>> GetByUserIdAsync(string userId, bool includeInactive = true)
-{
-    var query = _context.Bookings
-        .Include(b => b.Resource)
-        .Include(b => b.User)
-        .AsQueryable();
-
-    query = query.Where(b => b.UserId == userId);
-
-    if (!includeInactive)
-        query = query.Where(b => b.IsActive);
-
-    return await query.ToListAsync();
-}
-
-    /*public async Task<IEnumerable<Booking>> GetUserBookingsAsync(string UserId)
+    public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId)
     {
-    
-    }*/
+        return await _context.Bookings
+        .Include(b => b.Resource)
+        .Where(b => b.UserId == UserId)
+        .ToListAsync();
+    }
 
     public async Task<Booking> CreateAsync(Booking booking)
     {
@@ -67,19 +52,32 @@ public class BookingRepository : IBookingRepository
         return booking;
     }
 
-    public async Task<string> CancelBookingAsync(int BookingId)
+    public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
     {
-        var booking = _context.Bookings.FirstOrDefault(b => b.BookingId == BookingId);
+        var booking = _context.Bookings
+        .Include(b => b.Resource)
+        .FirstOrDefault(b => b.BookingId == BookingId);
+
         if (booking == null)
         {
             return "BookingNotFound";
+        }
+        else if (!isAdmin && booking.UserId != UserId)
+        {
+            return "BookingBelongsToOtherUser";
         }
         else if (booking.IsActive == false)
         {
             return "BookingHasExpired";
         }
+        else if (booking.Resource == null)
+        {
+            return "Error";
+        }
 
         booking.IsActive = false;
+        booking.Resource.IsBooked = false;
+
         await _context.SaveChangesAsync();
 
         return "Success";
