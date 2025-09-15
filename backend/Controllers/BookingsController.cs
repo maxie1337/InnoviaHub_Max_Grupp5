@@ -56,9 +56,10 @@ namespace backend.Controllers
 
         [Authorize(Roles = "Admin, Member")]
         [HttpGet("myBookings")]
-        public async Task<ActionResult> GetMyBookings(string UserId)
+        public async Task<ActionResult> GetMyBookings()
         {
-            var result = await _service.GetMyBookingsAsync(UserId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _service.GetMyBookingsAsync(userId);
             return Ok(result);
         }
 
