@@ -84,32 +84,19 @@ namespace backend.Services
             return created;
         }
 
-    public async Task<Booking> UpdateAsync(Booking booking)
-    {
-        return await _repository.UpdateAsync(booking);
+        public async Task<Booking> UpdateAsync(Booking booking)
+        {
+            var updated = await _repository.UpdateAsync(booking);
+            if (updated != null)
+            {
+                await _hubContext.Clients.All.SendAsync("BookingUpdated", updated);
+            }
+            return updated;
     }
 
         public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
         {
-            var booking = await _repository.GetByIdAsync(BookingId);
-            if (booking == null) return "BookingNotFound";
-
-            // Markera resursen som ledig igen
-            var resource = await _context.Resources.FindAsync(booking.ResourceId);
-            if (resource != null)
-            {
-                resource.IsBooked = false;
-            }
-
             var result = await _repository.CancelBookingAsync(UserId, isAdmin, BookingId);
-            await _context.SaveChangesAsync();
-
-            // Skicka SignalR-event
-            if (resource != null)
-                await _hubContext.Clients.All.SendAsync("ResourceUpdated", resource);
-
-            await _hubContext.Clients.All.SendAsync("BookingCancelled", booking.BookingId);
-
             return result;
         }
 

@@ -1,6 +1,8 @@
 using System;
 using backend.Data;
+using backend.Hubs;
 using backend.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repositories;
@@ -8,10 +10,12 @@ namespace backend.Repositories;
 public class BookingRepository : IBookingRepository
 {
     private readonly ApplicationDbContext _context;
+    private readonly IHubContext<BookingHub> _hubContext;
 
-    public BookingRepository(ApplicationDbContext context)
+    public BookingRepository(ApplicationDbContext context, IHubContext<BookingHub> hubContext)
     {
         _context = context;
+        _hubContext = hubContext;
     }
 
     public async Task<IEnumerable<Booking>> GetAllAsync()
@@ -79,6 +83,10 @@ public class BookingRepository : IBookingRepository
         booking.Resource.IsBooked = false;
 
         await _context.SaveChangesAsync();
+
+        // Skicka SignalR-event
+        await _hubContext.Clients.All.SendAsync("ResourceUpdated", booking.Resource);
+        await _hubContext.Clients.All.SendAsync("BookingCancelled", booking.BookingId);
 
         return "Success";
     }
