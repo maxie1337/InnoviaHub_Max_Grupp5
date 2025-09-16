@@ -7,6 +7,8 @@ import { UserProvider } from "./context/UserProvider.tsx";
 import Navbar from "./components/navbar.tsx";
 import BookingsPage from "@/pages/BookingPage.tsx";
 import ProtectedRoute from "./components/Auth/ProtectedRoute.tsx";
+import Footer from "./components/footer.tsx";
+
 
 function App() {
     return (
@@ -22,7 +24,7 @@ function App() {
                         <Route path="/bookings" element={ <ProtectedRoute> <BookingsPage /> </ProtectedRoute>} />
                     </Routes>
                 </main>
-                {/* <Footer /> */}
+                <Footer /> 
             </>
         </UserProvider>
     );
