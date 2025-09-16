@@ -28,7 +28,7 @@ export const registerUser = async (
             const errorText = await res.text();
             return {
                 success: false,
-                message: `Registrering misslyckades: ${res.status} - ${errorText}`,
+                message: `Registrering misslyckades: ${errorText}`,
             };
         }
 
@@ -62,7 +62,7 @@ export const loginUser = async (
             const errorText = await res.text();
             return {
                 success: false,
-                message: `Inloggning misslyckades: ${res.status} - ${errorText}`,
+                message: `Inloggning misslyckades: ${errorText}`,
             };
         }
 

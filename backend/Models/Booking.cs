@@ -11,7 +11,6 @@ public class Booking
     public DateTime EndDate { get; set; }
 
     [ForeignKey("UserId")]
-    public ApplicationUser? User { get; set; }
     public string UserId { get; set; } = string.Empty;
 
     [ForeignKey("ResourceId")]

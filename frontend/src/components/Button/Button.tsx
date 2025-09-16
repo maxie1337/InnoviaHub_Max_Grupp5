@@ -14,7 +14,7 @@ const Button = ({ children, onClick, className, design }: ButtonProps) => {
                 className={
                     className +
                     " " +
-                    "flex items-center justify-center cursor-pointer w-fit h-[45px] sm:h-[55px] border-black border-solid border-2 rounded-md text-sm sm:text-xl font-semibold text-center px-4 py-2 uppercase italic"
+                    "transition flex items-center justify-center cursor-pointer w-fit h-[45px] sm:h-[55px] border-solid border-2 rounded-md text-sm sm:text-xl font-semibold text-center px-4 py-2 uppercase italic"
                 }
                 onClick={onClick}
             >

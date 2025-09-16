@@ -3,30 +3,27 @@ using backend.Models;
 using backend.Services;
 using backend.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using backend.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BookingController : ControllerBase
+    public class BookingsController : ControllerBase
     {
         private readonly IBookingService _service;
 
         private readonly IHubContext<BookingHub> _hubContext;
 
-        public BookingController(IBookingService service, IHubContext<BookingHub> hubContext)
+        public BookingsController(IBookingService service, IHubContext<BookingHub> hubContext)
         {
             _service = service;
             _hubContext = hubContext;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Member")]
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
@@ -43,10 +40,26 @@ namespace backend.Controllers
             {
                 return NotFound();
             }
+            else if (!User.IsInRole("Admin") && result.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+            {
+                return Unauthorized("Bokningen tillhör en annan användare.");
+            }
             else
             {
                 return Ok(result);
             }
+        }
+
+        [Authorize(Roles = "Admin, Member")]
+        [HttpGet("myBookings")]
+        public async Task<ActionResult> GetMyBookings()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var result = await _service.GetMyBookingsAsync(userId);
+            return Ok(result);
         }
 
         [Authorize(Roles = "Admin, Member")]
@@ -59,14 +72,16 @@ namespace backend.Controllers
                 return BadRequest(ModelState);
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not found or not logged in.");
+            }
             
             var created = await _service.CreateAsync(userId, dto);
-
-            await _hubContext.Clients.All.SendAsync("Booking Created", created);
-
             return Ok(created);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] Booking booking)
         {
@@ -75,7 +90,6 @@ namespace backend.Controllers
 
             var updated = await _service.UpdateAsync(booking);
 
-            await _hubContext.Clients.All.SendAsync("Booking Updated", updated);
             return updated == null ? NotFound() : Ok(updated);
         }
 
@@ -83,19 +97,20 @@ namespace backend.Controllers
         [HttpPost("cancel/{BookingId}")]
         public async Task<ActionResult> CancelBooking(int BookingId)
         {
-            var result = await _service.CancelBookingAsync(BookingId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+            var result = await _service.CancelBookingAsync(userId, isAdmin, BookingId);
 
             if (result == "BookingNotFound")
             {
                 return NotFound(result);
             }
-            else if (result == "BookingHasExpired")
+            else if (result == "BookingHasExpired" || result == "BookingBelongsToOtherUser")
             {
                 return Conflict(result);
             }
             else
             {
-                 await _hubContext.Clients.All.SendAsync("Booking Cancelled", result);
                 return Ok(result);
             }
         }
@@ -107,7 +122,6 @@ namespace backend.Controllers
             var result = await _service.DeleteAsync(BookingId);
             if (result == true)
             {
-                await _hubContext.Clients.All.SendAsync("Booking Deleted", true);
                 return Ok();
             }
             else

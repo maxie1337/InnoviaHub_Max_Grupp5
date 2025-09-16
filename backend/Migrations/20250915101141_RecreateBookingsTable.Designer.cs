@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250910125606_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250915101141_RecreateBookingsTable")]
+    partial class RecreateBookingsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

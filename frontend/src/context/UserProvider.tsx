@@ -18,6 +18,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     // State to store the JWT token
     const [token, setToken] = useState<string>("");
 
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
@@ -82,6 +84,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         localStorage.setItem("token", result.data.token);
         localStorage.setItem("user", JSON.stringify(result.data.user));
 
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            email,
+        })
+    );
+
         // Update the state with token and user data
         setToken(result.data.token);
         setUser(result.data.user);
@@ -120,6 +129,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         token,
         isAuthenticated,
     };
+
+    if (loading) return <p>Laddar användare...</p>;  
 
     return (
         <UserContext.Provider value={contextValue}>

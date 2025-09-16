@@ -28,7 +28,9 @@ const Login = () => {
             toast.error("Fyll i både e-post och lösenord.", {
                 position: "top-center",
             });
+            return;
         }
+
         const success = await login(data.email, data.password);
 
         if (success) {
@@ -69,6 +71,8 @@ const Login = () => {
                         placeholder="E-post"
                         label="E-post"
                         required
+                        validationRegex={/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/}
+                        errorMessage="Ange en giltig e-postadress."
                     />
                     <FormInput
                         type="password"
@@ -78,9 +82,21 @@ const Login = () => {
                         placeholder="Lösenord"
                         label="Lösenord"
                         required
+                        validationRegex={
+                            /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{8,}$/
+                        }
+                        errorMessage="Lösenordet måste vara minst 8 tecken, innehålla en bokstav, en siffra och ett specialtecken."
                     />
-                    <Button design="outline" className="text-black">Logga in</Button>
-                    <p>
+                    <div className="flex justify-center my-6">
+                        <Button
+                            design="outline"
+                            className="text-white border-white hover:bg-sapphire-600"
+                        >
+                            Logga in
+                        </Button>
+                    </div>
+
+                    <p className="text-white">
                         Inget konto?{" "}
                         <span className="text-[#7a7a7a] cursor-pointer hover:text-black">
                             <Link to="/signup">Skapa konto här.</Link>

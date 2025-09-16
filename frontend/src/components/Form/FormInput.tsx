@@ -21,7 +21,6 @@ interface FormInputProps {
     label?: string;
 }
 
-
 const FormInput = ({
     type,
     name,
@@ -58,7 +57,7 @@ const FormInput = ({
             {label && (
                 <label
                     htmlFor={name}
-                    className="text-lg text-left font-medium inline-block text-black"
+                    className="text-lg font-medium text-white block mb-1 text-left"
                 >
                     {label}
                 </label>
@@ -72,10 +71,10 @@ const FormInput = ({
                 onBlur={handleBlur}
                 required={required}
                 placeholder={placeholder}
-                className={`block w-full px-4 py-2 text-lg font-normal text-gray-700 border-solid border-2 transition ease-in-out m-0 focus:text-gray-700 bg-white focus:border-blue-600 focus:outline-none ${
+                className={`block w-full px-4 py-2 text-lg font-normal text-gray-700 border-solid border-2 transition ease-in-out m-0 focus:text-gray-700 bg-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-400 focus:outline-none ${
                     showError
                         ? "border-red-500"
-                        : "border-gray-300 focus:border-blue-600"
+                        : "border-gray-300 focus:border-cyan-500"
                 } ${className || ""}`}
             />
             {showError && (

@@ -70,10 +70,6 @@ const Signup = () => {
                 position: "top-center",
             });
             navigate("/login");
-        } else {
-            toast.error("Något gick fel, försök igen.", {
-                position: "top-center",
-            });
         }
     };
     return (
@@ -130,7 +126,7 @@ const Signup = () => {
                         validationRegex={
                             /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{8,}$/
                         }
-                        errorMessage="Minst 8 tecken, inklusive en bokstav och en siffra."
+                        errorMessage="Lösenordet måste vara minst 8 tecken, innehålla en bokstav, en siffra och ett specialtecken."
                     />
 
                     <FormInput
@@ -141,16 +137,17 @@ const Signup = () => {
                         placeholder="Bekräfta lösenord"
                         label="Bekräfta lösenord"
                         required
+                        errorMessage="Bekräfta lösenordet."
                     />
-
-                    <Button
-                        design="outline"
-                        className="bg-yellow_green-900 hover:bg-yellow_green-800"
-                        type="submit"
-                    >
-                        Skapa konto
-                    </Button>
-                    <p>
+                    <div className="flex justify-center my-6">
+                        <Button
+                            design="outline"
+                            className="text-white border-white hover:bg-sapphire-600"
+                        >
+                            Skapa konto
+                        </Button>
+                    </div>
+                    <p className="text-white">
                         Redan har du ett konto?{" "}
                         <span className="text-[#7a7a7a] cursor-pointer hover:text-black">
                             <Link to="/login">Logga in här.</Link>
