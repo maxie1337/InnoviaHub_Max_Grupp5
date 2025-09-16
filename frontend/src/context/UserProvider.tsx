@@ -20,9 +20,27 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+        
+        console.log('UserProvider: Loading stored data - token:', !!storedToken, 'user:', !!storedUser);
+        
         if (storedToken) {
             setToken(storedToken);
+            console.log('UserProvider: Token loaded from localStorage');
         }
+        
+        if (storedUser) {
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
+                console.log('UserProvider: User loaded from localStorage:', parsedUser);
+            } catch (error) {
+                console.error("Error parsing stored user data:", error);
+                localStorage.removeItem("user");
+            }
+        }
+        
+        console.log('UserProvider: Initial load completed');
     }, []);
 
     // REGISTER
@@ -60,29 +78,37 @@ export const UserProvider = ({ children }: UserProviderProps) => {
             return false;
         }
 
-        // Save token in localStorage so the session persists after refresh
+        // Save token and user data in localStorage so the session persists after refresh
         localStorage.setItem("token", result.data.token);
+        localStorage.setItem("user", JSON.stringify(result.data.user));
 
         // Update the state with token and user data
         setToken(result.data.token);
-        setUser({ email });
+        setUser(result.data.user);
 
+        console.log('UserProvider: Login successful, user saved:', result.data.user);
+        console.log('UserProvider: Token saved:', result.data.token);
         return true;
     };
 
     // LOGOUT
     const logout = () => {
-        // Clears token from both state and localStorage
+        // Clears token and user data from both state and localStorage
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
         setUser({ email: "" });
         setToken("");
 
+        console.log('UserProvider: Logout successful, all data cleared');
         toast.success("Du är utloggad!", {
             position: "top-center",
         });
     };
 
     const isAuthenticated = token ? true : false;
+    
+    // Debug logging
+    console.log('UserProvider: Current state - token:', !!token, 'user:', user.email, 'isAuthenticated:', isAuthenticated);
 
     // This object will be passed down to all components using the context
     const contextValue: UserContextInterface = {

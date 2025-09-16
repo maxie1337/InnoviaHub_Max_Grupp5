@@ -4,6 +4,7 @@ import { UserContext } from "../context/UserContext.tsx";
 import toast from "react-hot-toast";
 import FormInput from "../components/Form/FormInput.tsx";
 import Button from "../components/Button/Button.tsx";
+import Navbar from "../components/navbar";
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -76,8 +77,10 @@ const Signup = () => {
         }
     };
     return (
-        <div className="flex flex-col min-h-screen items-center justify-center">
-            <div className="flex flex-col items-center justify-center py-8 px-6 bg-china_rose-900 border-2 rounded-xl mt-4 mx-4 gap-8">
+        <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <div className="flex flex-col min-h-screen items-center justify-center">
+                <div className="flex flex-col items-center justify-center py-8 px-6 bg-china_rose-900 border-2 rounded-xl mt-4 mx-4 gap-8">
                 <h1 className="text-3xl font-bold my-4">Skapa konto</h1>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <FormInput
@@ -154,6 +157,7 @@ const Signup = () => {
                         </span>
                     </p>
                 </form>
+                </div>
             </div>
         </div>
     );
