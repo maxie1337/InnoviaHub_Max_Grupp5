@@ -12,7 +12,7 @@
 
 .navbar-brand {
   font-weight: bold;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
 }
 
 .navbar-links {
@@ -63,16 +63,13 @@
     display: none;
     z-index: 10;
   }
-
   .navbar-links.open {
     display: flex;
   }
-
   .navbar-link {
     margin: 0.5rem 0;
     width: 100%;
   }
-
   .navbar-toggle {
     display: block;
   }
