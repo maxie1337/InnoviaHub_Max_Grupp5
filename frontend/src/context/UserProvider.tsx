@@ -21,15 +21,30 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-
-    if (storedToken) setToken(storedToken);
-    if (storedUser) setUser(JSON.parse(storedUser));
-
-    setLoading(false);
-}, []);
-
+        const storedToken = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+        
+        console.log('UserProvider: Loading stored data - token:', !!storedToken, 'user:', !!storedUser);
+        
+        if (storedToken) {
+            setToken(storedToken);
+            console.log('UserProvider: Token loaded from localStorage');
+        }
+        
+        if (storedUser) {
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
+                console.log('UserProvider: User loaded from localStorage:', parsedUser);
+            } catch (error) {
+                console.error("Error parsing stored user data:", error);
+                localStorage.removeItem("user");
+            }
+        }
+        
+        console.log('UserProvider: Initial load completed');
+        setLoading(false);
+    }, []);
 
     // REGISTER
     const register = async (
@@ -68,13 +83,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
         // Save token in localStorage so the session persists after refresh
         localStorage.setItem("token", result.data.token);
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            email,
-        })
-    );
 
         // Update the state with token and user data
         setToken(result.data.token);
