@@ -52,6 +52,14 @@ function App() {
     </div>
   );
 
+
+                        <Route path="/bookings" element={ <ProtectedRoute> <BookingsPage /> </ProtectedRoute>} />
+                    </Routes>
+                </main>
+                <Footer /> 
+            </>
+        </UserProvider>
+    );
 }
 
 export default App;
