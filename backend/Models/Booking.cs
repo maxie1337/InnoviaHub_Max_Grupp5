@@ -12,6 +12,7 @@ public class Booking
 
     [ForeignKey("UserId")]
     public string UserId { get; set; } = string.Empty;
+    public ApplicationUser? User { get; set; }
 
     [ForeignKey("ResourceId")]
     public Resource? Resource { get; set; }

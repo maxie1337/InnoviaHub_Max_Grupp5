@@ -1,6 +1,6 @@
 import { useContext, useState, type ChangeEvent, type FormEvent } from "react";
 import { UserContext } from "../context/UserContext.tsx";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import FormInput from "../components/Form/FormInput.tsx";
 import Button from "../components/Button/Button.tsx";

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import BookingPage from './pages/BookingPage';
 import AdminLayout from './components/Admin/Layout/AdminLayout';
 import Dashboard from './pages/Admin/Dashboard';
 import Users from './pages/Admin/Users';
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/bookings" element={<BookingPage />} />
         
         {/* Admin Routes with AdminAuthProvider */}
         <Route path="/admin/*" element={

@@ -43,6 +43,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         }
         
         console.log('UserProvider: Initial load completed');
+        setLoading(false);
     }, []);
 
     // REGISTER
@@ -83,13 +84,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         // Save token and user data in localStorage so the session persists after refresh
         localStorage.setItem("token", result.data.token);
         localStorage.setItem("user", JSON.stringify(result.data.user));
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            email,
-        })
-    );
 
         // Update the state with token and user data
         setToken(result.data.token);
