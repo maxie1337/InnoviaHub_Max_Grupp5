@@ -23,6 +23,9 @@ const Navbar: React.FC = () => {
                 <Link to="/bookings" className="navbar-link">
                     Booking
                 </Link>
+                <Link to="/myBookings" className="navbar-link">
+                    My Bookings
+                </Link>
                 {token ? (
                     <Link
                         to="/"

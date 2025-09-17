@@ -38,9 +38,9 @@ namespace backend.Services
             return await _repository.GetByIdAsync(BookingId);
         }
 
-        public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId)
+        public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId, bool includeInactiveBookings)
         {
-            return await _repository.GetMyBookingsAsync(UserId);
+            return await _repository.GetMyBookingsAsync(UserId, includeInactiveBookings);
         }
 
         public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)

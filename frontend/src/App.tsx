@@ -8,6 +8,7 @@ import Navbar from "./components/navbar.tsx";
 import BookingsPage from "@/pages/BookingPage.tsx";
 import ProtectedRoute from "./components/Auth/ProtectedRoute.tsx";
 import Footer from "./components/footer.tsx";
+import MyBookings from "./pages/MyBookings.tsx";
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
                         <Route path="/signup" element={<Signup />} />
 
                         <Route path="/bookings" element={ <ProtectedRoute> <BookingsPage /> </ProtectedRoute>} />
+                        <Route path="/myBookings" element={<MyBookings/>} />
                     </Routes>
                 </main>
                 <Footer /> 
