@@ -23,7 +23,7 @@ function App() {
                         <Route path="/signup" element={<Signup />} />
 
                         <Route path="/bookings" element={ <ProtectedRoute> <BookingsPage /> </ProtectedRoute>} />
-                        <Route path="/myBookings" element={<MyBookings/>} />
+                        <Route path="/myBookings" element={ <ProtectedRoute> <MyBookings/> </ProtectedRoute>} />
                     </Routes>
                 </main>
                 <Footer /> 

@@ -23,17 +23,20 @@ const Navbar: React.FC = () => {
                 <Link to="/bookings" className="navbar-link">
                     Booking
                 </Link>
-                <Link to="/myBookings" className="navbar-link">
-                    My Bookings
-                </Link>
                 {token ? (
-                    <Link
-                        to="/"
-                        className="navbar-link"
-                        onClick={() => logout()}
-                    >
-                        Log Out
-                    </Link>
+                    <>
+                        <Link to="/myBookings" className="navbar-link">
+                            My Bookings
+                        </Link>
+
+                        <Link
+                            to="/"
+                            className="navbar-link"
+                            onClick={() => logout()}
+                        >
+                            Log Out
+                        </Link>
+                    </>
                 ) : (
                     <Link to="/login" className="navbar-link">
                         Log In

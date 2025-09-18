@@ -1,5 +1,5 @@
 import type { Booking } from "@/types/booking";
-import Button from "../Button/Button";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 //Props that component receives
