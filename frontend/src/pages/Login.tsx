@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import FormInput from "../components/Form/FormInput.tsx";
 import Button from "../components/Button/Button.tsx";
+import Navbar from "../components/navbar";
 
 const Login = () => {
     const { login } = useContext(UserContext);
@@ -34,22 +35,34 @@ const Login = () => {
 
         if (success) {
             toast.success("Du är inloggad!", { position: "top-center" });
-            const redirectPath = location.state?.from?.pathname || "/";
-            navigate(redirectPath, { replace: true });
+            
+            // Wait a bit for state to update, then check role
+            setTimeout(() => {
+                const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+                console.log('Login successful, user role:', currentUser.role);
+                if (currentUser.role === "Admin") {
+                    console.log('Admin user detected, redirecting to admin dashboard');
+                    navigate("/admin/dashboard", { replace: true });
+                } else {
+                    console.log('Regular user detected, redirecting to main page');
+                    const redirectPath = location.state?.from?.pathname || "/";
+                    navigate(redirectPath, { replace: true });
+                }
+            }, 100);
+        } else {
+            toast.error("Felaktigt användarnamn eller lösenord!", {
+                position: "top-center",
+            });
         }
     };
 
     return (
-        <div className="flex flex-col min-h-screen items-center justify-center bg-gradient-to-br from-oxford_blue-500 via-sapphire-500 to-yale_blue-500">
-            <div
-                className="flex flex-col items-center justify-center py-12 px-6 bg-oxford_blue-400/90 border border-oxford_blue-600 
-                rounded-2xl shadow-2xl mt-4 mx-4 gap-8 max-w-md w-full backdrop-blur-md"
-            >
-                <form
-                    className="flex flex-col gap-8 w-full"
-                    onSubmit={handleSubmit}
-                    noValidate
-                >
+        <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <div className="flex flex-col min-h-screen items-center justify-center">
+                <div className="flex flex-col items-center justify-center py-8 px-6 bg-delft_blue-900 border-delft_blue-100 border-2 rounded-xl mt-4 mx-4 gap-8">
+                <h1 className="text-3xl font-bold">Logga in</h1>
+                <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                     <FormInput
                         type="email"
                         name="email"
@@ -90,6 +103,7 @@ const Login = () => {
                         </span>
                     </p>
                 </form>
+                </div>
             </div>
         </div>
     );
