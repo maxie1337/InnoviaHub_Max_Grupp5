@@ -4,9 +4,12 @@ import type { Dispatch, SetStateAction } from "react";
 // Define the user object type
 export type User = {
     id?: string;
-    username?: string;
     email: string;
-    role?: "admin" | "medlem";
+    firstName?: string;
+    lastName?: string;
+    role?: string;
+    isActive?: boolean;
+    roles?: string[];
 };
 
 // Define everything that will be available in the UserContext
