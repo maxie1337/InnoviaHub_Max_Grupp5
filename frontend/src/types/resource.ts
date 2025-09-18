@@ -3,8 +3,6 @@ export type Resource = {
   resourceTypeId: number;
   name: string;
   isBooked: boolean;
-  resourceType?: {
-    resourceTypeId: number;
-    name: string;
-  };
+  resourceTypeName?: string;
+
 };

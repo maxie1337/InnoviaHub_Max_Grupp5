@@ -55,12 +55,14 @@ export default function ResourceCard({
   };
 
   return (
-    <div className="border rounded-lg shadow p-4 flex flex-col justify-between">
+
+    
       
+
+    <div className="rounded-lg p-4 flex flex-col justify-between">
+
       <h3 className="text-lg font-semibold">{resource.name}</h3>
-      <p className="text-sm text-gray-500 mb-4">
-        {resource.resourceType?.name}
-      </p>
+      <br></br>
 
       {!isBooked && (
         <>
