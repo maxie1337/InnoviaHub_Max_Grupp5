@@ -23,7 +23,7 @@ export async function fetchMyBookings(token: string): Promise<Booking[]> {
 
 //Creates a booking for a resource, currently set for now -> 1 hour.
 //Can change so input manually is possible.
-export async function createBooking(token: string, resourceId: number) {
+export async function createBooking(token: string, resourceId: number, selectedDates: Date[]) {
   const res = await fetch(`${BASE_URL}/api/bookings`, {
     method: "POST",
     headers: {
@@ -32,8 +32,8 @@ export async function createBooking(token: string, resourceId: number) {
     },
     body: JSON.stringify({
       resourceId,
-      bookingDate: new Date().toISOString(),
-      endDate: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      bookingDate: selectedDates[0].toISOString(),
+      endDate: new Date(selectedDates[0].getTime() + 60 * 60 * 1000).toISOString(),
     }),
   });
   if (!res.ok) throw new Error("Kunde inte skapa bokning");

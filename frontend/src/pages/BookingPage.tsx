@@ -7,11 +7,12 @@ import { fetchResources } from "@/api/resourceApi";
 import { fetchBookings, fetchMyBookings, createBooking, cancelBooking } from "@/api/bookingApi";
 import ResourceCard from "@/components/Resource/ResourceCard";
 import toast from "react-hot-toast";
+import Navbar from "@/components/navbar";
 
 //Content for bookingpage
 export default function BookingsPage() {
   const { token} = useContext(UserContext);
-
+  const user = useContext(UserContext);
   //State for recourses, bookings and loading
   const [resources, setResources] = useState<Resource[]>([]);
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
@@ -87,12 +88,12 @@ export default function BookingsPage() {
   }, [token, hubUrl]);
 
   //Function for booking a resource
-  const handleBook = async (resourceId: number) => {
+  const handleBook = async (resourceId: number, selectedDates: Date[]) => {
     if (!token) return;
     try {
-      await createBooking(token, resourceId);
+      await createBooking(token, resourceId, selectedDates);
       toast.success("Bokning skapad!");
-
+      
       //Updating data after a booking
       const [newResources, newAllBookings, newMyBookings] = await Promise.all([
         fetchResources(token),
@@ -135,7 +136,9 @@ export default function BookingsPage() {
 
   //Page with resourcecard component
   return (
+    
     <div className="p-6 space-y-6">
+      <Navbar />
       <h1 className="text-2xl font-bold">Boka resurser</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
