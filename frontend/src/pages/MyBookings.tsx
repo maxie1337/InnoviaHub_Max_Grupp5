@@ -104,6 +104,8 @@ const MyBookings: React.FC = () => {
         }
     };
 
+    if (loading) return <p className="text-gray-600">Laddar bokningar...</p>;
+
     return (
         <div className="p-6 space-y-6">
             <h1 className="text-2xl font-bold">Mina bokningar</h1>
