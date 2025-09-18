@@ -7,11 +7,12 @@ import { fetchResources } from "@/api/resourceApi";
 import { fetchBookings, fetchMyBookings, createBooking, cancelBooking } from "@/api/bookingApi";
 import ResourceCard from "@/components/Resource/ResourceCard";
 import toast from "react-hot-toast";
+import Navbar from "@/components/navbar";
 
 //Content for bookingpage
 export default function BookingsPage() {
   const { token} = useContext(UserContext);
-
+  const user = useContext(UserContext);
   //State for recourses, bookings and loading
   const [resources, setResources] = useState<Resource[]>([]);
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
@@ -79,6 +80,7 @@ export default function BookingsPage() {
     connection.on("BookingCancelled", refreshData);
     connection.on("BookingDeleted", refreshData);
     connection.on("BookingUpdated", refreshData);
+    connection.on("ResourceUpdated", refreshData);
 
     //Stopping connection
     return () => {
@@ -87,12 +89,12 @@ export default function BookingsPage() {
   }, [token, hubUrl]);
 
   //Function for booking a resource
-  const handleBook = async (resourceId: number) => {
+  const handleBook = async (resourceId: number, selectedDates: Date[]) => {
     if (!token) return;
     try {
-      await createBooking(token, resourceId);
+      await createBooking(token, resourceId, selectedDates);
       toast.success("Bokning skapad!");
-
+      
       //Updating data after a booking
       const [newResources, newAllBookings, newMyBookings] = await Promise.all([
         fetchResources(token),
@@ -133,23 +135,129 @@ export default function BookingsPage() {
   //Loading text while resources are getting fetched
   if (loading) return <p className="text-gray-600">Laddar resurser...</p>;
 
+  //Grouping of resources to handle differently
+  const desks = resources.filter((r) => r.resourceTypeName === "DropInDesk");
+  const meetingRooms = resources.filter((r) => r.resourceTypeName === "MeetingRoom");
+  const vrSets = resources.filter((r) => r.resourceTypeName === "VRset");
+  const aiServers = resources.filter((r) => r.resourceTypeName === "AIserver");
+
   //Page with resourcecard component
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Boka resurser</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {resources.map((r) => (
-          <ResourceCard
-            key={r.resourceId}
-            resource={r}
-            allBookings={allBookings}
-            myBookings={myBookings}
-            onBook={handleBook}
-            onCancel={handleCancel}
-          />
-        ))}
+  <div className="p-6 space-y-12">
+    <h1 className="text-2xl font-bold">Boka resurser</h1>
+
+    {desks.length > 0 && (
+      <div>
+        <h3 className="text-2xl font-bold">Skrivbord</h3>
+        <div
+          className="grid gap-4 p-6 rounded-lg justify-center"
+          style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            maxWidth: "800px",
+            margin: "0 auto",
+          }}
+        >
+          {desks.map((r) => (
+            <div
+              key={r.resourceId}
+              className="p-2 rounded shadow bg-blue-100"
+            >
+              <ResourceCard
+                resource={r}
+                allBookings={allBookings}
+                myBookings={myBookings}
+                onBook={handleBook}
+                onCancel={handleCancel}
+              />
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  );
-}
+    )}
+
+    {meetingRooms.length > 0 && (
+      <div>
+        <h3 className="text-2xl font-bold">Mötesrum</h3>
+        <div className="grid gap-4 p-6 rounded-lg justify-center"
+        style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            maxWidth: "800px",
+            margin: "0 auto",
+          }}
+        >
+          {meetingRooms.map((r) => (
+            <div
+              key={r.resourceId}
+              className="p-2 rounded shadow bg-green-100"
+            >
+              <ResourceCard
+                resource={r}
+                allBookings={allBookings}
+                myBookings={myBookings}
+                onBook={handleBook}
+                onCancel={handleCancel}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {vrSets.length > 0 && (
+      <div>
+        <h3 className="text-2xl font-bold">VR Headsets</h3>
+        <div className="grid gap-4 p-6 rounded-lg justify-center"
+        style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            maxWidth: "800px",
+            margin: "0 auto",
+          }}
+        >
+          {vrSets.map((r) => (
+            <div
+              key={r.resourceId}
+              className="p-2 rounded shadow bg-purple-100"
+            >
+              <ResourceCard
+                resource={r}
+                allBookings={allBookings}
+                myBookings={myBookings}
+                onBook={handleBook}
+                onCancel={handleCancel}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {aiServers.length > 0 && (
+      <div>
+        <h3 className="text-2xl font-bold">AI Server</h3>
+        <div className="grid gap-4 p-6 rounded-lg justify-center"
+        style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            maxWidth: "200px",
+            margin: "0 auto",
+          }}
+        >
+          {aiServers.map((r) => (
+            <div
+              key={r.resourceId}
+              className="p-2 rounded shadow bg-red-100"
+            >
+              <ResourceCard
+                resource={r}
+                allBookings={allBookings}
+                myBookings={myBookings}
+                onBook={handleBook}
+                onCancel={handleCancel}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+)};

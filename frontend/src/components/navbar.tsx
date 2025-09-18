@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import "./navbar.css";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext.tsx";
 const Navbar: React.FC = () => {
     const [open, setOpen] = useState(false);
@@ -20,9 +20,11 @@ const Navbar: React.FC = () => {
                 <Link to="/" className="navbar-link">
                     Home
                 </Link>
-                <Link to="/bookings" className="navbar-link">
-                    Booking
-                </Link>
+                {token && (
+                    <Link to="/bookings" className="navbar-link">
+                        Booking
+                    </Link>
+                )}
                 {token ? (
                     <>
                         <Link to="/myBookings" className="navbar-link">

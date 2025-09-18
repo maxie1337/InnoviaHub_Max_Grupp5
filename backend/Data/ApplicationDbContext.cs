@@ -39,7 +39,7 @@ namespace backend.Data
                 {
                     ResourceId = i,
                     ResourceTypeId = 1,
-                    Name = $"Desk #{i}",
+                    Name = $"Desk {i}",
                     IsBooked = false
                 });
             }
