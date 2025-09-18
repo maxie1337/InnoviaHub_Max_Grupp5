@@ -247,9 +247,6 @@ namespace backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BookingId"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("varchar(255)");
-
                     b.Property<DateTime>("BookingDate")
                         .HasColumnType("datetime(6)");
 
@@ -264,13 +261,13 @@ namespace backend.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("BookingId");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.HasIndex("ResourceId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Bookings");
                 });
@@ -562,17 +559,21 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Booking", b =>
                 {
-                    b.HasOne("backend.Models.ApplicationUser", null)
-                        .WithMany("Bookings")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("backend.Models.Resource", "Resource")
                         .WithMany()
                         .HasForeignKey("ResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("backend.Models.ApplicationUser", "User")
+                        .WithMany("Bookings")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Resource");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("backend.Models.Resource", b =>

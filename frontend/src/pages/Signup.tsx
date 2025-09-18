@@ -1,9 +1,10 @@
 import { useContext, useState, type ChangeEvent } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext.tsx";
 import toast from "react-hot-toast";
 import FormInput from "../components/Form/FormInput.tsx";
 import Button from "../components/Button/Button.tsx";
+import Navbar from "../components/navbar";
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -72,16 +73,12 @@ const Signup = () => {
         }
     };
     return (
-        <div className="flex flex-col min-h-screen items-center justify-center bg-gradient-to-br from-oxford_blue-500 via-sapphire-500 to-yale_blue-500">
-            <div
-                className="flex flex-col items-center justify-center py-12 px-6 bg-oxford_blue-400/90 border border-oxford_blue-600 
-                rounded-2xl shadow-2xl mt-4 mx-4 max-w-md w-full backdrop-blur-md"
-            >
-                <form
-                    onSubmit={handleSubmit}
-                    className="flex flex-col gap-8 w-full"
-                    noValidate
-                >
+        <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <div className="flex flex-col min-h-screen items-center justify-center">
+                <div className="flex flex-col items-center justify-center py-8 px-6 bg-china_rose-900 border-2 rounded-xl mt-4 mx-4 gap-8">
+                <h1 className="text-3xl font-bold my-4">Skapa konto</h1>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <FormInput
                         type="text"
                         name="firstName"
@@ -157,6 +154,7 @@ const Signup = () => {
                         </span>
                     </p>
                 </form>
+                </div>
             </div>
         </div>
     );

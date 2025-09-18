@@ -1,11 +1,13 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./LandingPage.css";
-import { Link } from "react-router";
-
+import Navbar from "./components/navbar";
 
 const LandingPage: React.FC = () => {
   return (
     <div className="landing-root">
+      {/* Navigation Bar */}
+      <Navbar />
       
       {/* Hero Section */}
       <section className="hero">

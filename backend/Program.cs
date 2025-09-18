@@ -1,6 +1,7 @@
 using backend.Data;
 using backend.Hubs;
 using backend.Mapping;
+using backend.Middleware;
 using backend.Models;
 using backend.Repositories;
 using backend.Services;
@@ -20,6 +21,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<IResourceService, ResourceService>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -28,12 +33,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddScoped<IBookingService, BookingService>();
-
-builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // Add Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -66,7 +66,8 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? ""))
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? "")),
+        ClockSkew = TimeSpan.Zero
     };
 });
 
@@ -85,7 +86,54 @@ builder.Services.AddCors(options =>
 // Add Authorization
 builder.Services.AddAuthorization();
 
-builder.Services.AddOpenApi();
+// Add Swagger/OpenAPI
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "InnoviaHub Admin API",
+        Version = "v1",
+        Description = "Comprehensive Admin API for InnoviaHub System",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "InnoviaHub Team",
+            Email = "admin@innoviahub.com"
+        }
+    });
+
+    // Add JWT Authentication to Swagger
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+    // Include XML comments
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
+});
 
 builder.Services.AddSignalR();
 
@@ -97,6 +145,16 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "InnoviaHub Admin API v1");
+        c.RoutePrefix = "swagger";
+        c.DocumentTitle = "InnoviaHub Admin API Documentation";
+        c.DefaultModelsExpandDepth(-1);
+        c.DisplayRequestDuration();
+    });
+    
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
@@ -111,6 +169,10 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedRolesAndUsersAsync(roleManager, userManager);
 }
 
+// Add middleware
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 app.UseCors("FrontendPolicy");
 app.MapHub<BookingHub>("/bookingHub").RequireCors("FrontendPolicy");
 app.UseHttpsRedirection();
@@ -118,5 +180,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
 app.MapControllers().RequireCors("FrontendPolicy");
-app.MapFallbackToFile("index.html");
 app.Run();
