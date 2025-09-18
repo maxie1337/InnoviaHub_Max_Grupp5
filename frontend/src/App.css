@@ -1,3 +1,9 @@
+/* gör så att footer alltid är på längst ner på sidan */
+main
+{
+  min-height: calc(100vh - 174px);
+}
+
 #root {
   
   margin: 0 auto;

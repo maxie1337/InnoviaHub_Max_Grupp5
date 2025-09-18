@@ -35,7 +35,7 @@ export default function MyBookingCard({booking, onCancel}: ResourceCardProps)
         <div className="border rounded-lg shadow p-4 flex flex-col justify-between">
             <h3 className="text-lg font-semibold">{booking.resource.name}</h3>
             
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm mb-4">
                 {startDateString} - {endDateString}
             </p>
 
