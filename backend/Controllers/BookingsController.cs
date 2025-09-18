@@ -52,13 +52,13 @@ namespace backend.Controllers
 
         [Authorize(Roles = "Admin, Member")]
         [HttpGet("myBookings")]
-        public async Task<ActionResult> GetMyBookings()
+        public async Task<ActionResult> GetMyBookings(bool includeInactiveBookings = false)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var result = await _service.GetMyBookingsAsync(userId);
+            var result = await _service.GetMyBookingsAsync(userId, includeInactiveBookings);
             return Ok(result);
         }
 

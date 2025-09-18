@@ -11,6 +11,7 @@ import Resources from "./pages/Admin/Resources";
 import ProtectedRoute from "./components/Admin/ProtectedRoute";
 import AdminWrapper from "./components/Admin/AdminWrapper";
 import "./App.css";
+import MyBookings from "./pages/MyBookings";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/bookings" element={<BookingPage />} />
+        <Route path="/myBookings" element={ <ProtectedRoute> <MyBookings/> </ProtectedRoute>} />
 
         {/* Admin Routes with AdminAuthProvider */}
         <Route
