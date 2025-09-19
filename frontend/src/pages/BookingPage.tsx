@@ -7,7 +7,6 @@ import { fetchResources } from "@/api/resourceApi";
 import { fetchBookings, fetchMyBookings, createBooking, cancelBooking } from "@/api/bookingApi";
 import ResourceCard from "@/components/Resource/ResourceCard";
 import toast from "react-hot-toast";
-import Navbar from "@/components/navbar";
 
 //Content for bookingpage
 export default function BookingsPage() {

@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import FormInput from "../components/Form/FormInput.tsx";
 import Button from "../components/Button/Button.tsx";
-import Navbar from "../components/navbar";
 
 const Login = () => {
     const { login } = useContext(UserContext);
@@ -57,8 +56,7 @@ const Login = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen">
-            <Navbar />
+        <div className="flex flex-col min-h-screen">            
             <div className="flex flex-col min-h-screen items-center justify-center">
                 <div className="flex flex-col items-center justify-center py-8 px-6 bg-delft_blue-900 border-delft_blue-100 border-2 rounded-xl mt-4 mx-4 gap-8">
                 <h1 className="text-3xl font-bold">Logga in</h1>
