@@ -2,9 +2,11 @@ import React, { useContext, useState } from "react";
 import "./navbar.css";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext.tsx";
+
+
 const Navbar: React.FC = () => {
     const [open, setOpen] = useState(false);
-    const { token, logout } = useContext(UserContext);
+    const { token, logout, user } = useContext(UserContext);
 
     return (
         <nav className="navbar">
@@ -27,9 +29,16 @@ const Navbar: React.FC = () => {
                 )}
                 {token ? (
                     <>
+                    
                         <Link to="/myBookings" className="navbar-link">
                             My Bookings
                         </Link>
+                        {/** Admin Link */}
+                        {user.role === "Admin" && (
+                            <Link to="/admin/dashboard" className="navbar-link">
+                                Admin
+                            </Link>
+                        )}
 
                         <Link
                             to="/"

@@ -8,14 +8,18 @@ import Dashboard from "./pages/Admin/Dashboard";
 import Users from "./pages/Admin/Users";
 import Bookings from "./pages/Admin/Bookings";
 import Resources from "./pages/Admin/Resources";
-import ProtectedRoute from "./components/Admin/ProtectedRoute";
+import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute";
 import AdminWrapper from "./components/Admin/AdminWrapper";
 import "./App.css";
 import MyBookings from "./pages/MyBookings";
+import Navbar from "./components/navbar";
+import Footer from "./components/footer";
+import ProtectedRoute from "./components/Auth/ProtectedRoute";
 
 function App() {
   return (
     <div className="App">
+      <Navbar />
       <Routes>
         {/* Main Website Routes */}
         <Route path="/" element={<LandingPage />} />
@@ -59,6 +63,7 @@ function App() {
         {/* Default redirect to home page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Footer />
     </div>
   );
 }

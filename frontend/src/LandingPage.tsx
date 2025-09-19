@@ -1,14 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./LandingPage.css";
-import Navbar from "./components/navbar";
+
 
 const LandingPage: React.FC = () => {
   return (
-    <div className="landing-root">
-      {/* Navigation Bar */}
-      <Navbar />
-      
+    <div className="landing-root">            
       {/* Hero Section */}
       <section className="hero">
         <h1 className="text-2xl font-bold mb-4">Welcome to Innovia Hub</h1>
