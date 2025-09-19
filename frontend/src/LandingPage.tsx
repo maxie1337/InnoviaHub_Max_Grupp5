@@ -1,9 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./LandingPage.css";
-
+import { UserContext } from "@/context/UserContext.tsx";
 
 const LandingPage: React.FC = () => {
+
+  const { token } = React.useContext(UserContext);
+
+  const isLoggedIn = !!token;
+
   return (
     <div className="landing-root">            
       {/* Hero Section */}
@@ -30,11 +35,13 @@ const LandingPage: React.FC = () => {
         <p className="mb-6">
           Book your resources in seconds and experience effortless management with Innovia Hub.
         </p>
+        
+        
         <Link
-          to="/bookings"
+          to={isLoggedIn ? "/bookings" : "/signup"}
           className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl transition"
         >
-          Go to Booking Page
+          {isLoggedIn ? "Go to Booking Page" : "Sign Up"}
         </Link>
       </section>
     </div>
