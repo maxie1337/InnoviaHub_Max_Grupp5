@@ -16,6 +16,7 @@ namespace backend.Mapping
             CreateMap<ResourceReqDTO, Resource>();
 
             // Map ResourceDTO --> Resource
+
             CreateMap<ResourceDTO, Resource>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
