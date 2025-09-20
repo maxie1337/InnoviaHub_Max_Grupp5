@@ -90,53 +90,53 @@ builder.Services.AddCors(options =>
 builder.Services.AddAuthorization();
 
 // Add Swagger/OpenAPI
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "InnoviaHub Admin API",
-        Version = "v1",
-        Description = "Comprehensive Admin API for InnoviaHub System",
-        Contact = new Microsoft.OpenApi.Models.OpenApiContact
-        {
-            Name = "InnoviaHub Team",
-            Email = "admin@innoviahub.com"
-        }
-    });
+//builder.Services.AddSwaggerGen(c =>
+//{
+//    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+//    {
+//        Title = "InnoviaHub Admin API",
+//        Version = "v1",
+//        Description = "Comprehensive Admin API for InnoviaHub System",
+//        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+//        {
+//            Name = "InnoviaHub Team",
+//            Email = "admin@innoviahub.com"
+//        }
+//    });
 
-    // Add JWT Authentication to Swagger
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
+//    // Add JWT Authentication to Swagger
+//    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+//    {
+//        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+//        Name = "Authorization",
+//        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+//        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+//        Scheme = "Bearer"
+//    });
 
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+//    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+//    {
+//        {
+//            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+//            {
+//                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+//                {
+//                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+//                    Id = "Bearer"
+//                }
+//            },
+//            Array.Empty<string>()
+//        }
+//    });
 
-    // Include XML comments
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-    {
-        c.IncludeXmlComments(xmlPath);
-    }
-});
+//    // Include XML comments
+//    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+//    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+//    if (File.Exists(xmlPath))
+//    {
+//        c.IncludeXmlComments(xmlPath);
+//    }
+//});
 
 builder.Services.AddSignalR();
 
@@ -154,15 +154,15 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "InnoviaHub Admin API v1");
-        c.RoutePrefix = "swagger";
-        c.DocumentTitle = "InnoviaHub Admin API Documentation";
-        c.DefaultModelsExpandDepth(-1);
-        c.DisplayRequestDuration();
-    });
+    //app.UseSwagger();
+    //app.UseSwaggerUI(c =>
+    //{
+    //    c.SwaggerEndpoint("/swagger/v1/swagger.json", "InnoviaHub Admin API v1");
+    //    c.RoutePrefix = "swagger";
+    //    c.DocumentTitle = "InnoviaHub Admin API Documentation";
+    //    c.DefaultModelsExpandDepth(-1);
+    //    c.DisplayRequestDuration();
+    //});
     
     app.MapOpenApi();
     app.MapScalarApiReference();
