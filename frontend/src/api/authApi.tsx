@@ -10,7 +10,7 @@ export const registerUser = async (
 ): Promise<ApiResult<null>> => {
     try {
         const res = await fetch(
-            `http://localhost:5296/api/auth/register`,
+            `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -50,7 +50,7 @@ export const loginUser = async (
 ): Promise<ApiResult<{ token: string; user: any }>> => {
     try {
         const res = await fetch(
-            `http://localhost:5296/api/auth/login`,
+            `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
