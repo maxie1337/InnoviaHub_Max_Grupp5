@@ -17,6 +17,9 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+    .AddEnvironmentVariables();
+
 
 // Add services to the container.
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
@@ -141,6 +144,12 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<IJwtTokenManager, JwtTokenManager>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate(); // applies pending migrations automatically
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
