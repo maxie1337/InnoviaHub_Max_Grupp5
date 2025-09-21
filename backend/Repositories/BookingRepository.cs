@@ -96,13 +96,9 @@ public class BookingRepository : IBookingRepository
         {
             return "BookingBelongsToOtherUser";
         }
-        else if (currentTime < booking.EndDate)
+        else if (currentTime > booking.EndDate)
         {
             return "BookingHasExpired";
-        }
-        else if (booking.Resource == null)
-        {
-            return "Error";
         }
 
         var result = await DeleteAsync(booking.BookingId);
