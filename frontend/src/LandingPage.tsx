@@ -1,14 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./LandingPage.css";
-import Navbar from "./components/navbar";
+import { UserContext } from "@/context/UserContext.tsx";
 
 const LandingPage: React.FC = () => {
+
+  const { token } = React.useContext(UserContext);
+
+  const isLoggedIn = !!token;
+
   return (
-    <div className="landing-root">
-      {/* Navigation Bar */}
-      <Navbar />
-      
+    <div className="landing-root">            
       {/* Hero Section */}
       <section className="hero">
         <h1 className="text-2xl font-bold mb-4">Welcome to Innovia Hub</h1>
@@ -33,11 +35,13 @@ const LandingPage: React.FC = () => {
         <p className="mb-6">
           Book your resources in seconds and experience effortless management with Innovia Hub.
         </p>
+        
+        
         <Link
-          to="/bookings"
+          to={isLoggedIn ? "/bookings" : "/signup"}
           className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl transition"
         >
-          Go to Booking Page
+          {isLoggedIn ? "Go to Booking Page" : "Sign Up"}
         </Link>
       </section>
     </div>

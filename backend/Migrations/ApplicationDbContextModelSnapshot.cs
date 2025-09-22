@@ -259,6 +259,9 @@ namespace backend.Migrations
                     b.Property<int>("ResourceId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Timeslot")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");

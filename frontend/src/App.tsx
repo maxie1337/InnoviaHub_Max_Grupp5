@@ -8,20 +8,24 @@ import Dashboard from "./pages/Admin/Dashboard";
 import Users from "./pages/Admin/Users";
 import Bookings from "./pages/Admin/Bookings";
 import Resources from "./pages/Admin/Resources";
-import ProtectedRoute from "./components/Admin/ProtectedRoute";
+import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute";
 import AdminWrapper from "./components/Admin/AdminWrapper";
 import "./App.css";
 import MyBookings from "./pages/MyBookings";
+import Navbar from "./components/navbar";
+import Footer from "./components/footer";
+import ProtectedRoute from "./components/Auth/ProtectedRoute";
 
 function App() {
   return (
-    <div className="App">
+    <div className="App min-h-screen flex flex-col">
+      <Navbar />
       <Routes>
         {/* Main Website Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/bookings" element={<BookingPage />} />
+        <Route path="/bookings" element={<ProtectedRoute><BookingPage /> </ProtectedRoute>}/>
         <Route path="/myBookings" element={ <ProtectedRoute> <MyBookings/> </ProtectedRoute>} />
 
         {/* Admin Routes with AdminAuthProvider */}
@@ -33,9 +37,9 @@ function App() {
                 <Route
                   path=""
                   element={
-                    <ProtectedRoute>
+                    <AdminProtectedRoute>
                       <AdminLayout />
-                    </ProtectedRoute>
+                    </AdminProtectedRoute>
                   }
                 >
                   <Route
@@ -59,6 +63,7 @@ function App() {
         {/* Default redirect to home page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Footer />
     </div>
   );
 }
