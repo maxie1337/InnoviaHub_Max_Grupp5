@@ -94,7 +94,22 @@ builder.Services.AddCors(options =>
 // Add Authorization
 builder.Services.AddAuthorization();
 
-builder.Services.AddSignalR();
+// Add SignalR
+
+// If connection string is provided in Azure use Azure SignalR Service.
+// Otherwise use the normal in-process SignalR (so local dev keeps working).
+var azureSignalRConnection = builder.Configuration["Azure:SignalR:ConnectionString"];
+
+if (!string.IsNullOrEmpty(azureSignalRConnection))
+{
+    // You can pass the connection string explicitly or let the SDK read the env var.
+    builder.Services.AddSignalR()
+           .AddAzureSignalR(options => options.ConnectionString = azureSignalRConnection);
+}
+else
+{
+    builder.Services.AddSignalR();
+}
 
 // Add JWT Token Manager
 builder.Services.AddScoped<IJwtTokenManager, JwtTokenManager>();
