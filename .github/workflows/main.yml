@@ -31,7 +31,7 @@ jobs:
 
       # 4. Build the backend
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build backend.sln --configuration Release --no-restore
         working-directory: ./backend
 
       # 5. Publish project (creates a package for deployment)
@@ -39,7 +39,7 @@ jobs:
         run: dotnet publish -c Release -o ./publish
         working-directory: ./backend
 
-      # 7. Deploy to Azure Web App
+      # 6. Deploy to Azure Web App
       - name: Deploy to Azure WebApp
         uses: azure/webapps-deploy@v2
         with:
