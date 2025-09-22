@@ -70,6 +70,7 @@ export const loginUser = async (
 
         return { success: true, data: { token: data.token, user: data.user } };
     } catch (error) {
+        
         console.error(error);
         return {
             success: false,
