@@ -101,7 +101,7 @@ builder.Services.AddScoped<IJwtTokenManager, JwtTokenManager>();
 
 var app = builder.Build();
 
-// Apply pending EF Core migrations at startup, except in CI environment.
+// Apply pending EF Core migrations at startup, except in CI environment
 if (!app.Environment.IsEnvironment("CI"))
 {
     using (var scope = app.Services.CreateScope())
