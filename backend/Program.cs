@@ -104,7 +104,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate(); // applies pending migrations automatically
+    db.Database.Migrate(); //applies pending migrations automatically
 }
 
 // Configure the HTTP request pipeline.
@@ -129,7 +129,9 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseCors("FrontendPolicy");
+
 app.MapHub<BookingHub>("/bookingHub").RequireCors("FrontendPolicy");
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
