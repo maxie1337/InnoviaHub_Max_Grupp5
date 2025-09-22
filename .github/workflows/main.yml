@@ -10,6 +10,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      DOTNET_ENVIRONMENT: CI
 
     steps:
       # 1. Get the code
