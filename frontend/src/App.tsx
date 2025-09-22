@@ -18,14 +18,14 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 
 function App() {
   return (
-    <div className="App">
+    <div className="App min-h-screen flex flex-col">
       <Navbar />
       <Routes>
         {/* Main Website Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/bookings" element={<BookingPage />} />
+        <Route path="/bookings" element={<ProtectedRoute><BookingPage /> </ProtectedRoute>}/>
         <Route path="/myBookings" element={ <ProtectedRoute> <MyBookings/> </ProtectedRoute>} />
 
         {/* Admin Routes with AdminAuthProvider */}
