@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-    <PropertyGroup>
+    <PropertyGroup Condition="'$(DOTNET_ENVIRONMENT)' != 'CI'">
 		<OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
 		<OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)</OpenApiDocumentsDirectory>
 	</PropertyGroup>
