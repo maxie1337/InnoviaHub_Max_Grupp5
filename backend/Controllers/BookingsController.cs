@@ -52,13 +52,22 @@ namespace backend.Controllers
 
         [Authorize(Roles = "Admin, Member")]
         [HttpGet("myBookings")]
-        public async Task<ActionResult> GetMyBookings(bool includeInactiveBookings = false)
+        public async Task<ActionResult> GetMyBookings(bool includeExpiredBookings = false)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var result = await _service.GetMyBookingsAsync(userId, includeInactiveBookings);
+            var result = await _service.GetMyBookingsAsync(userId, includeExpiredBookings);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin, Member")]
+        [HttpGet("getByResource/{resourceId}")]
+        public async Task<ActionResult> GetResourceBookings(int resourceId, bool includeExpiredBookings = false)
+        {
+            var result = await _service.GetResourceBookingsAsync(resourceId, includeExpiredBookings);
+
             return Ok(result);
         }
 
@@ -105,7 +114,7 @@ namespace backend.Controllers
             {
                 return NotFound(result);
             }
-            else if (result == "BookingHasExpired" || result == "BookingBelongsToOtherUser")
+            else if (result == "BookingHasExpired" || result == "BookingBelongsToOtherUser" || result == "Failure")
             {
                 return Conflict(result);
             }

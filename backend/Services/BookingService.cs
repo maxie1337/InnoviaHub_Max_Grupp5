@@ -38,9 +38,14 @@ namespace backend.Services
             return await _repository.GetByIdAsync(BookingId);
         }
 
-        public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId, bool includeInactiveBookings)
+        public async Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId, bool includeExpiredBookings)
         {
-            return await _repository.GetMyBookingsAsync(UserId, includeInactiveBookings);
+            return await _repository.GetMyBookingsAsync(UserId, includeExpiredBookings);
+        }
+
+        public async Task<IEnumerable<GetResourceBookingsDTO>> GetResourceBookingsAsync(int resourceId, bool includeExpiredBookings)
+        {
+            return await _repository.GetResourceBookingsAsync(resourceId, includeExpiredBookings);
         }
 
         public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)
@@ -50,35 +55,23 @@ namespace backend.Services
             {
                 throw new Exception("ResourceDoesntExist");
             }
-            else if (resource.IsBooked == true)
+            if (dto.Timeslot != "FM" && dto.Timeslot != "EF")
             {
-                throw new Exception("ResourceIsOccupied");
-            }
-            else
-            {
-                var resourceDTO = new ResourceDTO
-                {
-                    ResourceTypeId = resource.ResourceTypeId,
-                    Name = resource.Name,
-                    IsBooked = true
-                };
-
-                await _resourceService.UpdateAsync(resource.ResourceId, resourceDTO);
+                throw new Exception("NoTimeslotSpecified");
             }
 
+            DateTime bDate = dto.BookingDate;
             var booking = new Booking
             {
                 IsActive = true,
-                BookingDate = dto.BookingDate,
-                EndDate = dto.EndDate,
+                BookingDate = dto.Timeslot == "FM" ? new DateTime(bDate.Year, bDate.Month, bDate.Day, 8, 0, 0) : new DateTime(bDate.Year, bDate.Month, bDate.Day, 12, 0, 0),
+                EndDate = dto.Timeslot == "FM" ? new DateTime(bDate.Year, bDate.Month, bDate.Day, 12, 0, 0) : new DateTime(bDate.Year, bDate.Month, bDate.Day, 16, 0, 0),
                 UserId = UserId,
                 ResourceId = dto.ResourceId
             };
 
             var created = await _repository.CreateAsync(booking);
 
-            // Skicka SignalR-event
-            await _hubContext.Clients.All.SendAsync("ResourceUpdated", resource);
             await _hubContext.Clients.All.SendAsync("BookingCreated", created);
 
             return created;
@@ -92,7 +85,7 @@ namespace backend.Services
                 await _hubContext.Clients.All.SendAsync("BookingUpdated", updated);
             }
             return updated;
-    }
+        }
 
         public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
         {
