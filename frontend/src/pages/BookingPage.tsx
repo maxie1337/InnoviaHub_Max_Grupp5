@@ -10,8 +10,8 @@ import toast from "react-hot-toast";
 
 //Content for bookingpage
 export default function BookingsPage() {
+
   const { token} = useContext(UserContext);
-  const user = useContext(UserContext);
   //State for recourses, bookings and loading
   const [resources, setResources] = useState<Resource[]>([]);
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
@@ -142,25 +142,18 @@ export default function BookingsPage() {
 
   //Page with resourcecard component
   return (
-
   <div className="p-6 space-y-12">
-    <h1 className="text-2xl font-bold">Boka resurser</h1>
 
     {desks.length > 0 && (
       <div>
-        <h3 className="text-2xl font-bold">Skrivbord</h3>
-        <div
-          className="grid gap-4 p-6 rounded-lg justify-center"
-          style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-            maxWidth: "800px",
-            margin: "0 auto",
-          }}
-        >
+        <h3 className="text-2xl font-bold mb-4 text-center">Desks</h3>
+        <br />
+        <div className="grid gap-6"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", maxWidth: "1200px", margin: "0 auto", }}>
           {desks.map((r) => (
             <div
               key={r.resourceId}
-              className="p-2 rounded shadow bg-blue-100"
+              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
             >
               <ResourceCard
                 resource={r}
@@ -177,18 +170,15 @@ export default function BookingsPage() {
 
     {meetingRooms.length > 0 && (
       <div>
-        <h3 className="text-2xl font-bold">Mötesrum</h3>
-        <div className="grid gap-4 p-6 rounded-lg justify-center"
-        style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-            maxWidth: "800px",
-            margin: "0 auto",
-          }}
-        >
+        <br />
+        <h3 className="text-2xl font-bold mb-4 text-center">Meeting Rooms</h3>
+        <br />
+        <div className="grid gap-6"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", maxWidth: "1200px", margin: "0 auto", }}>
           {meetingRooms.map((r) => (
             <div
               key={r.resourceId}
-              className="p-2 rounded shadow bg-green-100"
+              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
             >
               <ResourceCard
                 resource={r}
@@ -205,18 +195,15 @@ export default function BookingsPage() {
 
     {vrSets.length > 0 && (
       <div>
-        <h3 className="text-2xl font-bold">VR Headsets</h3>
-        <div className="grid gap-4 p-6 rounded-lg justify-center"
-        style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-            maxWidth: "800px",
-            margin: "0 auto",
-          }}
-        >
+        <br />
+        <h3 className="text-2xl font-bold mb-4 text-center">VR Headsets</h3>
+        <br />
+        <div className="grid gap-6"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", maxWidth: "1200px", margin: "0 auto", }}>
           {vrSets.map((r) => (
             <div
               key={r.resourceId}
-              className="p-2 rounded shadow bg-purple-100"
+              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
             >
               <ResourceCard
                 resource={r}
@@ -233,18 +220,15 @@ export default function BookingsPage() {
 
     {aiServers.length > 0 && (
       <div>
-        <h3 className="text-2xl font-bold">AI Server</h3>
-        <div className="grid gap-4 p-6 rounded-lg justify-center"
-        style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-            maxWidth: "200px",
-            margin: "0 auto",
-          }}
-        >
+        <br />
+        <h3 className="text-2xl font-bold mb-4 text-center">AI Server</h3>
+        <br />
+        <div className="grid gap-6"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", maxWidth: "500px", margin: "0 auto", }}>
           {aiServers.map((r) => (
             <div
               key={r.resourceId}
-              className="p-2 rounded shadow bg-red-100"
+              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
             >
               <ResourceCard
                 resource={r}

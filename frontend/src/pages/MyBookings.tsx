@@ -10,7 +10,7 @@ import "./MyBookings.css";
 const MyBookings: React.FC = () => {
     const {token} = useContext(UserContext);
     
-    //State for recourses, bookings and loading
+    //State for bookings and loading
     const [myBookings, setMyBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -104,19 +104,21 @@ const MyBookings: React.FC = () => {
         }
     };
 
-    if (loading) return <p className="text-gray-600">Laddar bokningar...</p>;
+    if (loading) return <p className="text-gray-600">Loading bookings...</p>;
 
     return (
         <div className="p-6 space-y-6">
-            <h1 className="text-2xl font-bold">Mina bokningar</h1>
+            <h1 className="text-2xl font-bold text-center">My bookings</h1>
+            <br />
     
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid gap-6"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(400px, 400px))", justifyContent: "center", maxWidth: "1200px", margin: "0 auto",}}>
                 {myBookings.map((b) => 
                 (
                     <MyBookingCard booking={b} onCancel={handleCancel}/>
                 ))}
             </div>
-            {myBookings.length == 0 ? <p>Du har inga aktiva bokningar.</p> : null}
+            {myBookings.length == 0 ? <p className="text-center">You have no active bookings.</p> : null}
         </div>
     );
 };
