@@ -1,32 +1,32 @@
-## Om
+# Om
 Detta projekt är ett bokningssystem för ett coworkingcenter där man kan boka skrivbord, mötesrum, etc med realtidsuppdatering.
 
-## Teknisk information
-# Ramverk och bibliotek
+# Teknisk information
+## Ramverk och bibliotek
 - React
 - Tailwind
 - ASP.NET Core Web API
 - MySQL
 - SignalR 
 
-# Annat
+## Annat
 - Frontend körs på [http://localhost:5173](http://localhost:5173)
 - Backend körs på [http://localhost:5296](http://localhost:5296)
 - Använder RESTful API.
 - Använder JWT-token för autentisering.
 
-## Appbyggande
-# Nödvändiga installationer
+# Appbyggande
+## Nödvändiga installationer
 - .NET 8 eller 9
 - Node.js & npm
 - MySQL
 
-# Databas
+## Databas
 Skapa en SQL connection på localhost:3306.
 Gå in på "appsettings.json" i backend-mappen.
 I strängen "DefaultConnection", ändra "User" till din connections användarnamn och "Password" till din connections lösenord.
 
-# Starta applikationen
+## Starta applikationen
 ```
 cd backend
 dotnet ef database update
@@ -39,8 +39,8 @@ npm install
 npm run dev
 ```
 
-## Endpoints
-# Auth endpoints
+# Endpoints
+## Auth endpoints
 
 **GET**
 **/api/auth/health**
@@ -95,7 +95,7 @@ string Token
 Uppdaterar och returnerar token.
 
 
-# Booking endpoints
+## Booking endpoints
 
 **GET**
 **/api/bookings/**
@@ -163,7 +163,7 @@ Autentisering: Admin
 Tar bort bokning.
 
 
-# Resource endpoints
+## Resource endpoints
 
 **GET**
 **/api/bookings/resources**
