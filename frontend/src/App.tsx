@@ -15,10 +15,12 @@ import MyBookings from "./pages/MyBookings";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop.tsx";
 
 function App() {
     return (
         <div className="App min-h-screen flex flex-col">
+            <ScrollToTop />
             <Navbar />
             <Routes>
                 {/* Main Website Routes */}
