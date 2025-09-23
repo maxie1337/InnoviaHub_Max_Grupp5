@@ -45,7 +45,7 @@ const LandingPage: React.FC = () => {
                     <Link to={isLoggedIn ? "/bookings" : "/signup"}>
                         <Button
                             design="outline-white"
-                            className="px-6 py-3 text-black mt-8"
+                            className="px-6 py-3 text-[#2563eb] mt-8"
                         >
                             {isLoggedIn ? "Go to Booking Page" : "Sign Up"}
                         </Button>
