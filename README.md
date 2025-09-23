@@ -39,10 +39,19 @@ npm install
 npm run dev
 ```
 
+## Användare
+För att boka måste du logga in. <br />
+Du kan skapa en ny användare eller logga in med admin kontot. <br />
+Admins kan använda admin tools genom att gå in på [http://localhost:5173/admin](http://localhost:5173/admin) <br />
+
+**Admin konto:** <br />
+**E-post: admin@innoviahub.com**, <br />
+**Lösenord: Admin123!**
+
 # Endpoints
 <details>
 
-<summary> Auth endpoints </summary> 
+<summary> Authentication endpoints </summary> 
 
 **GET**
 **/api/auth/health**
