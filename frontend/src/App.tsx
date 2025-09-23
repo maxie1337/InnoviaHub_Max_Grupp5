@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from "./LandingPage";
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import BookingPage from "./pages/BookingPage";
@@ -17,55 +17,89 @@ import Footer from "./components/footer";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 
 function App() {
-  return (
-    <div className="App min-h-screen flex flex-col">
-      <Navbar />
-      <Routes>
-        {/* Main Website Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/bookings" element={<ProtectedRoute><BookingPage /> </ProtectedRoute>}/>
-        <Route path="/myBookings" element={ <ProtectedRoute> <MyBookings/> </ProtectedRoute>} />
-
-        {/* Admin Routes with AdminAuthProvider */}
-        <Route
-          path="/admin/*"
-          element={
-            <AdminWrapper>
-              <Routes>
+    return (
+        <div className="App min-h-screen flex flex-col">
+            <Navbar />
+            <Routes>
+                {/* Main Website Routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
                 <Route
-                  path=""
-                  element={
-                    <AdminProtectedRoute>
-                      <AdminLayout />
-                    </AdminProtectedRoute>
-                  }
-                >
-                  <Route
-                    index
-                    element={<Navigate to="/admin/dashboard" replace />}
-                  />
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="users" element={<Users />} />
-                  <Route path="bookings" element={<Bookings />} />
-                  <Route path="resources" element={<Resources />} />
-                  <Route
-                    path="*"
-                    element={<Navigate to="/admin/dashboard" replace />}
-                  />
-                </Route>
-              </Routes>
-            </AdminWrapper>
-          }
-        />
+                    path="/bookings"
+                    element={
+                        <ProtectedRoute>
+                            <BookingPage />{" "}
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/myBookings"
+                    element={
+                        <ProtectedRoute>
+                            {" "}
+                            <MyBookings />{" "}
+                        </ProtectedRoute>
+                    }
+                />
 
-        {/* Default redirect to home page */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <Footer />
-    </div>
-  );
+                {/* Admin Routes with AdminAuthProvider */}
+                <Route
+                    path="/admin/*"
+                    element={
+                        <AdminWrapper>
+                            <Routes>
+                                <Route
+                                    path=""
+                                    element={
+                                        <AdminProtectedRoute>
+                                            <AdminLayout />
+                                        </AdminProtectedRoute>
+                                    }
+                                >
+                                    <Route
+                                        index
+                                        element={
+                                            <Navigate
+                                                to="/admin/dashboard"
+                                                replace
+                                            />
+                                        }
+                                    />
+                                    <Route
+                                        path="dashboard"
+                                        element={<Dashboard />}
+                                    />
+                                    <Route path="users" element={<Users />} />
+                                    <Route
+                                        path="bookings"
+                                        element={<Bookings />}
+                                    />
+                                    <Route
+                                        path="resources"
+                                        element={<Resources />}
+                                    />
+                                    <Route
+                                        path="*"
+                                        element={
+                                            <Navigate
+                                                to="/admin/dashboard"
+                                                replace
+                                            />
+                                        }
+                                    />
+                                </Route>
+                            </Routes>
+                        </AdminWrapper>
+                    }
+                />
+
+                {/* Default redirect to home page */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <Footer />
+        </div>
+    );
 }
 
 export default App;

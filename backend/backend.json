@@ -1557,7 +1557,38 @@
         ],
         "parameters": [
           {
-            "name": "includeInactiveBookings",
+            "name": "includeExpiredBookings",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Bookings/getByResource/{resourceId}": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "parameters": [
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "includeExpiredBookings",
             "in": "query",
             "schema": {
               "type": "boolean",
@@ -2167,9 +2198,6 @@
         "nullable": true
       },
       "Booking": {
-        "required": [
-          "isActive"
-        ],
         "type": "object",
         "properties": {
           "bookingId": {
@@ -2203,6 +2231,9 @@
         }
       },
       "BookingDTO": {
+        "required": [
+          "timeslot"
+        ],
         "type": "object",
         "properties": {
           "resourceId": {
@@ -2213,9 +2244,8 @@
             "type": "string",
             "format": "date-time"
           },
-          "endDate": {
-            "type": "string",
-            "format": "date-time"
+          "timeslot": {
+            "type": "string"
           }
         }
       },
