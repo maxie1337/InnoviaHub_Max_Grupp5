@@ -48,23 +48,21 @@ npm run dev
 Returnerar statuskod 400 om API:et fungerar.
 
 **POST**
-**/api/auth/register**
-
-Body:
-string Email,
-string FirstName,
-string LastName,
-string Password,
+**/api/auth/register** <br />
+Body: <br />
+string Email, <br />
+string FirstName, <br />
+string LastName, <br />
+string Password, <br />
 string ConfirmPassword
 
 Skapar en ny användare med rollen "Member".
 
 **POST**
-**/api/auth/login**
-
-Body:
-string Email,
-string Password
+**/api/auth/login** <br />
+Body: <br /> 
+string Email, <br /> 
+string Password 
 
 Loggar in användare och returnerar JWT-token.
 
@@ -74,26 +72,24 @@ Loggar in användare och returnerar JWT-token.
 Loggar ut användare.
 
 **GET**
-**api/auth/profile**
-
+**api/auth/profile** <br />
 Autentisering: Member
+
 Returnerar hela objektet av användaren som loggar in.
 
 **PUT**
-**/api/auth/profile**
-
-Autentisering: Member
-Body:
-string FirstName
-string LastName
+**/api/auth/profile** <br />
+Autentisering: Member <br />
+Body: <br />
+string FirstName <br /> 
+string LastName 
 
 Ändrar FirstName och LastName av användaren som loggar in.
 
 **POST**
-**/api/auth/refresh-token**
-
-Autentisering: Member
-Body:
+**/api/auth/refresh-token** <br />
+Autentisering: Member <br />
+Body: <br />
 string Token
 
 Uppdaterar och returnerar token.
@@ -102,73 +98,66 @@ Uppdaterar och returnerar token.
 ## Booking endpoints
 
 **GET**
-**/api/bookings/**
+**/api/bookings/** <br />
+Autentisering: Admin, Member <br />
 
-Autentisering: Admin, Member
 Returnerar alla bokningar.
 
 **GET**
-**/api/bookings/{bookingId}**
-
+**/api/bookings/{bookingId}** <br />
 Autentisering: Admin, Member
 
 Returnerar bokning som motsvarar id.
 
 **GET**
-**/api/bookings/myBookings**
-
-Autentisering: Admin, Member
-Body:
+**/api/bookings/myBookings** <br />
+Autentisering: Admin, Member <br />
+Body: <br />
 bool includeExpiredBookings (default är false)
 
 Returnerar alla aktiva bokningar som tillhör användaren. Måste specificera om man vill inkludera inaktiva bokningar.
 
 **GET**
-**/api/bookings/getByResource/{resourceId}**
-
-Autentisering: Admin, Member
-Body:
+**/api/bookings/getByResource/{resourceId}** <br />
+Autentisering: Admin, Member <br />
+Body: <br />
 bool includeExpiredBookings (default är false)
 
 Returnerar alla aktiva bokningar som tillhör en resurs. Måste specificera om man vill inkludera inaktiva bokningar.
 
 **POST**
-**/api/bookings**
-
-Autentisering: Admin, Member
-Body:
-int ResourceId
-DateTime BookingTime
+**/api/bookings** <br />
+Autentisering: Admin, Member <br />
+Body: <br /> 
+int ResourceId <br /> 
+DateTime BookingTime <br />
 string Timeslot (måste vara "FM" eller "EF")
 
 Skapar en bokning. Tiden på "BookingTime" ersätts av "8:00" eller "12:00" beroende på timeslot.
 
 **PUT**
-**/api/bookings**
-
-Autentisering: Admin
-Body:
-int BookingId,
-bool IsActive,
-DateTime BookingDate,
-DateTime EndDate,
-string UserId,
+**/api/bookings** <br /> 
+Autentisering: Admin <br />
+Body: <br />
+int BookingId, <br />
+bool IsActive, <br /> 
+DateTime BookingDate, <br />
+DateTime EndDate, <br />
+string UserId, <br />
 int ResourceId
 
 Uppdaterar bokning.
 
 **POST**
-**/api/bookings/cancel/{bookingId}**
+**/api/bookings/cancel/{bookingId}** <br />
+Autentisering: Admin, Member <br />
 
-Autentisering: Admin, Member
-
-Tar bort bokning som motsvarar "bookingId".
-Members kan bara ta bort sina egna bokningar och Admins kan ta bort vilken bokning som helst.
+Tar bort bokning som motsvarar "bookingId". <br />
+Members kan bara ta bort sina egna bokningar och Admins kan ta bort vilken bokning som helst. <br />
 Bokningar som har gått ut kan inte tas bort.
 
 **POST**
-**/api/bookings/delete/{bookingId}**
-
+**/api/bookings/delete/{bookingId}** <br />
 Autentisering: Admin
 
 Tar bort bokning.
@@ -177,43 +166,38 @@ Tar bort bokning.
 ## Resource endpoints
 
 **GET**
-**/api/bookings/resources**
-
+**/api/bookings/resources** <br />
 Autentisering: Admin, Member
 
 Returnerar alla resurser.
 
 **GET**
-**api/resources/{resourceId}**
-
+**api/resources/{resourceId}** <br />
 Autentisering: Admin, Member
 
 Returnerar resurs som motsvarar id.
 
 **POST**
-**api/resources**
-
-Autentisering: Admin
-Body:
-int ResourceTypeId (1 = DropInDesk, 2 = MeetingRoom, 3 = VRset, 4 = AIserver),
+**api/resources** <br />
+Autentisering: Admin <br />
+Body: <br />
+int ResourceTypeId (1 = DropInDesk, 2 = MeetingRoom, 3 = VRset, 4 = AIserver), <br />
 string Name
 
 Skapar en ny resurs.
 
 **PUT**
-**api/resources/{resourceId}**
-
-Autentisering: Admin
-Body:
-int ResourceTypeId (1 = DropInDesk, 2 = MeetingRoom, 3 = VRset, 4 = AIserver),
-string Name,
+**api/resources/{resourceId}** <br />
+Autentisering: Admin <br />
+Body: <br />
+int ResourceTypeId (1 = DropInDesk, 2 = MeetingRoom, 3 = VRset, 4 = AIserver), <br />
+string Name, <br />
 bool IsBooked
 
 Uppdaterar resursen som motsvarar id.
 
 **DELETE**
-**api/resources/{resourceId}**
-
+**api/resources/{resourceId}** <br />
 Autentisering: Admin
 
 Tar bort resurs.
