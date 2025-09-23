@@ -40,7 +40,9 @@ npm run dev
 ```
 
 # Endpoints
-## Auth endpoints
+<details>
+
+<summary> Auth endpoints </summary> 
 
 **GET**
 **/api/auth/health**
@@ -94,8 +96,12 @@ string Token
 
 Uppdaterar och returnerar token.
 
+</details>
 
-## Booking endpoints
+<details>
+
+<summary> Booking endpoints </summary> 
+
 
 **GET**
 **/api/bookings/** <br />
@@ -162,8 +168,11 @@ Autentisering: Admin
 
 Tar bort bokning.
 
+</details>
 
-## Resource endpoints
+<details>
+
+<summary> Resource endpoints </summary> 
 
 **GET**
 **/api/bookings/resources** <br />
@@ -201,3 +210,5 @@ Uppdaterar resursen som motsvarar id.
 Autentisering: Admin
 
 Tar bort resurs.
+
+</details>
