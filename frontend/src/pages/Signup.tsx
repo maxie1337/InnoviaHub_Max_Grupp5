@@ -73,9 +73,9 @@ const Signup = () => {
     };
     return (
         <div className="flex flex-col min-h-screen">
-            <div className="flex flex-col items-center justify-center my-12">
-                <div className="flex flex-col items-center justify-center py-16 px-12 bg-true_blue-500 border-true_blue-100 border-2 rounded-xl mt-4 mx-4 gap-8 w-full max-w-md md:max-w-lg">
-                    <h1 className="text-3xl font-bold my-4 text-white">
+            <div className="flex flex-1 items-center justify-center px-4 py-12 sm:py-16">
+                <div className="flex flex-col items-center justify-center w-full max-w-md sm:max-w-lg md:max-w-xl bg-true_blue-500 border-2 border-true_blue-100 rounded-2xl gap-8 p-8 sm:p-12">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
                         Sign up
                     </h1>
                     <form
@@ -145,12 +145,12 @@ const Signup = () => {
                         <div className="flex justify-center my-6">
                             <Button
                                 design="outline"
-                                className="text-white border-white hover:bg-sapphire-900 hover:text-black hover:border-black"
+                                className="text-white border-white hover:bg-sapphire-900 hover:text-black hover:border-black w-full sm:w-auto"
                             >
                                 Create account
                             </Button>
                         </div>
-                        <p className="text-white">
+                        <p className="text-white text-center text-sm sm:text-base">
                             Already have an account?{" "}
                             <span className="font-semibold cursor-pointer hover:text-black">
                                 <Link to="/login">Sign in here.</Link>
