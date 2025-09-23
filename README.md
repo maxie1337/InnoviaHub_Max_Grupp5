@@ -22,9 +22,9 @@ Detta projekt är ett bokningssystem för ett coworkingcenter där man kan boka 
 - MySQL
 
 ## Databas
-Skapa en SQL connection på localhost:3306.
-Gå in på "appsettings.json" i backend-mappen.
-I strängen "DefaultConnection", ändra "User" till din connections användarnamn och "Password" till din connections lösenord.
+- Skapa en SQL connection på localhost:3306.
+- Gå in på "appsettings.json" i backend-mappen.
+- I strängen "DefaultConnection", ändra "User" till din connections användarnamn och "Password" till din connections lösenord.
 
 ## Starta applikationen
 ```
@@ -49,6 +49,7 @@ Returnerar statuskod 400 om API:et fungerar.
 
 **POST**
 **/api/auth/register**
+
 Body:
 string Email,
 string FirstName,
@@ -60,6 +61,7 @@ Skapar en ny användare med rollen "Member".
 
 **POST**
 **/api/auth/login**
+
 Body:
 string Email,
 string Password
@@ -73,12 +75,13 @@ Loggar ut användare.
 
 **GET**
 **api/auth/profile**
-Autentisering: Member
 
+Autentisering: Member
 Returnerar hela objektet av användaren som loggar in.
 
 **PUT**
 **/api/auth/profile**
+
 Autentisering: Member
 Body:
 string FirstName
@@ -88,6 +91,7 @@ string LastName
 
 **POST**
 **/api/auth/refresh-token**
+
 Autentisering: Member
 Body:
 string Token
@@ -99,18 +103,20 @@ Uppdaterar och returnerar token.
 
 **GET**
 **/api/bookings/**
-Autentisering: Admin, Member
 
+Autentisering: Admin, Member
 Returnerar alla bokningar.
 
 **GET**
 **/api/bookings/{bookingId}**
+
 Autentisering: Admin, Member
 
 Returnerar bokning som motsvarar id.
 
 **GET**
 **/api/bookings/myBookings**
+
 Autentisering: Admin, Member
 Body:
 bool includeExpiredBookings (default är false)
@@ -119,6 +125,7 @@ Returnerar alla aktiva bokningar som tillhör användaren. Måste specificera om
 
 **GET**
 **/api/bookings/getByResource/{resourceId}**
+
 Autentisering: Admin, Member
 Body:
 bool includeExpiredBookings (default är false)
@@ -127,6 +134,7 @@ Returnerar alla aktiva bokningar som tillhör en resurs. Måste specificera om m
 
 **POST**
 **/api/bookings**
+
 Autentisering: Admin, Member
 Body:
 int ResourceId
@@ -137,6 +145,7 @@ Skapar en bokning. Tiden på "BookingTime" ersätts av "8:00" eller "12:00" bero
 
 **PUT**
 **/api/bookings**
+
 Autentisering: Admin
 Body:
 int BookingId,
@@ -150,6 +159,7 @@ Uppdaterar bokning.
 
 **POST**
 **/api/bookings/cancel/{bookingId}**
+
 Autentisering: Admin, Member
 
 Tar bort bokning som motsvarar "bookingId".
@@ -158,6 +168,7 @@ Bokningar som har gått ut kan inte tas bort.
 
 **POST**
 **/api/bookings/delete/{bookingId}**
+
 Autentisering: Admin
 
 Tar bort bokning.
@@ -167,18 +178,21 @@ Tar bort bokning.
 
 **GET**
 **/api/bookings/resources**
+
 Autentisering: Admin, Member
 
 Returnerar alla resurser.
 
 **GET**
 **api/resources/{resourceId}**
+
 Autentisering: Admin, Member
 
 Returnerar resurs som motsvarar id.
 
 **POST**
 **api/resources**
+
 Autentisering: Admin
 Body:
 int ResourceTypeId (1 = DropInDesk, 2 = MeetingRoom, 3 = VRset, 4 = AIserver),
@@ -188,6 +202,7 @@ Skapar en ny resurs.
 
 **PUT**
 **api/resources/{resourceId}**
+
 Autentisering: Admin
 Body:
 int ResourceTypeId (1 = DropInDesk, 2 = MeetingRoom, 3 = VRset, 4 = AIserver),
@@ -198,6 +213,7 @@ Uppdaterar resursen som motsvarar id.
 
 **DELETE**
 **api/resources/{resourceId}**
+
 Autentisering: Admin
 
 Tar bort resurs.
