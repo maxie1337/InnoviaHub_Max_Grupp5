@@ -12,6 +12,7 @@ import {
 } from "@/api/bookingApi";
 import ResourceCard from "@/components/Resource/ResourceCard";
 import toast from "react-hot-toast";
+import AnimatedSimpleLoading from "@/components/AnimatedIcons/AnimatedSimpleLoading.tsx";
 
 //Content for bookingpage
 export default function BookingsPage() {
@@ -146,7 +147,13 @@ export default function BookingsPage() {
     };
 
     //Loading text while resources are getting fetched
-    if (loading) return <p className="text-gray-600">Laddar resurser...</p>;
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <AnimatedSimpleLoading />
+            </div>
+        );
+    }
 
     //Grouping of resources to handle differently
     const desks = resources.filter((r) => r.resourceTypeName === "DropInDesk");
