@@ -39,8 +39,19 @@ npm install
 npm run dev
 ```
 
+## Användare
+För att boka måste du logga in. <br />
+Du kan skapa en ny användare eller logga in med admin kontot. <br />
+Admins kan använda admin tools genom att gå in på [http://localhost:5173/admin](http://localhost:5173/admin) <br />
+
+**Admin konto:** <br />
+**E-post: admin@innoviahub.com**, <br />
+**Lösenord: Admin123!**
+
 # Endpoints
-## Auth endpoints
+<details>
+
+<summary> Authentication endpoints </summary> 
 
 **GET**
 **/api/auth/health**
@@ -94,8 +105,12 @@ string Token
 
 Uppdaterar och returnerar token.
 
+</details>
 
-## Booking endpoints
+<details>
+
+<summary> Booking endpoints </summary> 
+
 
 **GET**
 **/api/bookings/** <br />
@@ -162,8 +177,11 @@ Autentisering: Admin
 
 Tar bort bokning.
 
+</details>
 
-## Resource endpoints
+<details>
+
+<summary> Resource endpoints </summary> 
 
 **GET**
 **/api/bookings/resources** <br />
@@ -201,3 +219,5 @@ Uppdaterar resursen som motsvarar id.
 Autentisering: Admin
 
 Tar bort resurs.
+
+</details>
