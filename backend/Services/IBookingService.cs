@@ -12,6 +12,6 @@ public interface IBookingService
     Task<IEnumerable<GetResourceBookingsDTO>> GetResourceBookingsAsync(int resourceId, bool includeExpiredBookings);
     Task<Booking> CreateAsync(string UserId, BookingDTO dto);
     Task<Booking> UpdateAsync(Booking booking);
-    Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId);
-    Task<bool> DeleteAsync(int BookingId);
+    Task<Booking?> CancelBookingAsync(string UserId, bool isAdmin, int BookingId);
+    Task<Booking?> DeleteAsync(int BookingId);
 }

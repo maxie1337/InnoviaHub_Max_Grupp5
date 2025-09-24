@@ -1,47 +1,112 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import * as signalR from "@microsoft/signalr";
 import { UserContext } from "@/context/UserContext";
 import type { Resource } from "@/types/resource";
-import type { Booking } from "@/types/booking";
+import type { Booking, BookingDTO } from "@/types/booking";
 import { fetchResources } from "@/api/resourceApi";
 import { fetchBookings, fetchMyBookings, createBooking, cancelBooking } from "@/api/bookingApi";
 import ResourceCard from "@/components/Resource/ResourceCard";
+import CalendarComponent from "@/components/Calender/calenderComponent";
+import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
-//Content for bookingpage
-export default function BookingsPage() {
+//Format for bookingdate (Stockholm time)
+const dateKey = (d: Date | string) => {
+  const date = typeof d === "string" ? new Date(d) : d;
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("sv-SE", {
+    timeZone: "Europe/Stockholm",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+};
 
-  const { token} = useContext(UserContext);
-  //State for recourses, bookings and loading
+//Current time stockholm
+const currentSthlmHour = () =>
+  parseInt(
+    new Intl.DateTimeFormat("sv-SE", {
+      timeZone: "Europe/Stockholm",
+      hour: "2-digit",
+      hour12: false,
+    }).format(new Date()),
+    10
+  );
+
+//Year month date for today in stockholm
+const todayKeySthlm = () =>
+  new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Stockholm",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
+export default function BookingsPage() {
+  const { token } = useContext(UserContext);
   const [resources, setResources] = useState<Resource[]>([]);
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
-  //SignalR URL
-  const hubUrl = useMemo(
-    () => `${import.meta.env.VITE_API_BASE_URL}/bookingHub`,
-    []
-  );
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+  const [timeOfDay, setTimeOfDay] = useState<"Morning" | "Afternoon" | null>(null);
 
-  //Gets resources, bookings and setting up signalR connection
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
+  const hubUrl = useMemo(() => `${import.meta.env.VITE_API_BASE_URL}/bookingHub`, []);
+
+  type DaySlots = { FM: boolean; EF: boolean };
+  const slotMap = useMemo(() => {
+    const map = new Map<string, DaySlots>();
+
+    for (const b of allBookings) {
+      if (!b.isActive) continue;
+
+      const key = `${b.resource.resourceId}__${dateKey(b.bookingDate)}`;
+      const entry = map.get(key) ?? { FM: false, EF: false };
+
+      //FM EM For swedish time
+      const sthlmHour = parseInt(
+      new Intl.DateTimeFormat("sv-SE", {
+        timeZone: "Europe/Stockholm",
+        hour: "2-digit",
+        hour12: false,
+      }).format(new Date(b.bookingDate)),
+      10
+    );
+
+      const slot: "FM" | "EF" = sthlmHour < 12 ? "FM" : "EF";
+
+      if (slot === "FM") entry.FM = true;
+      else entry.EF = true;
+
+      map.set(key, entry);
+    }
+    return map;
+  }, [allBookings]);
+
+  //Fetching bookings & recources 
+  useEffect(() => {
+    if (!token) return;
+    (async () => {
+      try {
+        const [r, ab, mb] = await Promise.all([fetchResources(token), fetchBookings(token), fetchMyBookings(token)]);
+        setResources(r);
+        setAllBookings(ab);
+        setMyBookings(mb);
+      } catch {
+        toast.error("Could not fetch data");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [token]);
+
+  //SignalR Connection and listeners for actions
   useEffect(() => {
     if (!token) return;
 
-    //Gets resources and bookings at the same time
-    Promise.all([fetchResources(token), fetchBookings(token), fetchMyBookings(token)])
-      .then(([resources, allBookings, myBookings]) => {
-        setResources(resources);
-        setAllBookings(allBookings);
-        setMyBookings(myBookings);
-      })
-      .catch(() => {
-        toast.error("Kunde inte hämta resurser eller bokningar");
-      })
-      .finally(() => setLoading(false));
-
-
-    //Creating signalR connection
     const connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => token || "",
@@ -51,196 +116,259 @@ export default function BookingsPage() {
       .withAutomaticReconnect()
       .build();
 
+    connectionRef.current = connection;
+
+    const refreshData = async () => {
+      if (!token) return;
+      const [r, ab, mb] = await Promise.all([fetchResources(token), fetchBookings(token), fetchMyBookings(token)]);
+      setResources(r);
+      setAllBookings(ab);
+      setMyBookings(mb);
+    };
+
     //Starting connection
     const start = async () => {
       try {
         await connection.start();
         console.log("SignalR connected");
+
+        connection.on("BookingCreated", refreshData);
+        connection.on("BookingUpdated", refreshData);
+        connection.on("BookingCancelled", refreshData);
+        connection.on("BookingDeleted", refreshData);
+        connection.on("ResourceUpdated", refreshData);
       } catch (err) {
-        console.error("SignalR start error:", err);
+        console.error("SignalR connect error:", err);
+        //Fallback on timeout, 5 sek
+        setTimeout(start, 5000);
       }
     };
+
     start();
-
-    //Function to get resources and bookings when a change is made
-    const refreshData = async () => {
-      const [newResources, newAllBookings, newMyBookings] = await Promise.all([
-        fetchResources(token),
-        fetchBookings(token),
-        fetchMyBookings(token),
-      ]);
-      setResources(newResources);
-      setAllBookings(newAllBookings);
-      setMyBookings(newMyBookings);
-    };
-
-    //Listening on signalR events (Changes in bookings)
-    connection.on("BookingCreated", refreshData);
-    connection.on("BookingCancelled", refreshData);
-    connection.on("BookingDeleted", refreshData);
-    connection.on("BookingUpdated", refreshData);
-    connection.on("ResourceUpdated", refreshData);
 
     //Stopping connection
     return () => {
+      connection.off("BookingCreated");
+      connection.off("BookingUpdated");
+      connection.off("BookingCancelled");
+      connection.off("BookingDeleted");
+      connection.off("ResourceUpdated");
       connection.stop();
     };
   }, [token, hubUrl]);
 
-  //Function for booking a resource
-  const handleBook = async (resourceId: number, selectedDates: Date[]) => {
+  //Function to handle booking
+  const handleBook = async (
+    resourceId: number,
+    dateKeyStr: string,
+    time: "Morning" | "Afternoon"
+  ) => {
     if (!token) return;
+
+    const today = todayKeySthlm();
+    const hour = currentSthlmHour();
+
+    if (dateKeyStr < today) {
+      toast.error("You cannot book a past date.");
+      return;
+    }
+    if (dateKeyStr === today) {
+      if (time === "Morning" && hour >= 12) {
+        toast.error("Morning has already passed today.");
+        return;
+      }
+      if (time === "Afternoon" && hour >= 16) {
+        toast.error("Afternoon has already passed today.");
+        return;
+      }
+    }
+
     try {
-      await createBooking(token, resourceId, selectedDates);
-      toast.success("Bokning skapad!");
-      
-      //Updating data after a booking
-      const [newResources, newAllBookings, newMyBookings] = await Promise.all([
-        fetchResources(token),
-        fetchBookings(token),
-        fetchMyBookings(token),
-      ]);
-      setResources(newResources);
-      setAllBookings(newAllBookings);
-      setMyBookings(newMyBookings);
+      //Backend saving in UTC
+      const dto: BookingDTO = {
+        resourceId,
+        bookingDate: dateKeyStr,  
+        timeslot: time === "Morning" ? "FM" : "EF",
+      };
+
+      await createBooking(token, dto);
+      toast.success("Booking created!");
+
+      const [r, ab, mb] = await Promise.all([fetchResources(token), fetchBookings(token), fetchMyBookings(token)]);
+      setResources(r);
+      setAllBookings(ab);
+      setMyBookings(mb);
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message ?? "Kunde inte skapa bokning");
+      toast.error(err?.message ?? "Could not create booking");
     }
   };
 
-  //Function to cancel a booking
+  //Cancel booking function
   const handleCancel = async (bookingId: number) => {
     if (!token) return;
     try {
       await cancelBooking(token, bookingId);
-      toast.success("Bokning avbokad!");
+      toast.success("Booking canceled!");
 
-      //Updating data after cancel has happened
-      const [newResources, newAllBookings, newMyBookings] = await Promise.all([
-        fetchResources(token),
-        fetchBookings(token),
-        fetchMyBookings(token),
-      ]);
-      setResources(newResources);
-      setAllBookings(newAllBookings);
-      setMyBookings(newMyBookings);
+      const [r, ab, mb] = await Promise.all([fetchResources(token), fetchBookings(token), fetchMyBookings(token)]);
+      setResources(r);
+      setAllBookings(ab);
+      setMyBookings(mb);
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message ?? "Kunde inte avboka");
+      toast.error(err?.message ?? "Could not cancel booking");
     }
   };
-
-  //Loading text while resources are getting fetched
-  if (loading) return <p className="text-gray-600">Laddar resurser...</p>;
-
-  //Grouping of resources to handle differently
+  
   const desks = resources.filter((r) => r.resourceTypeName === "DropInDesk");
   const meetingRooms = resources.filter((r) => r.resourceTypeName === "MeetingRoom");
   const vrSets = resources.filter((r) => r.resourceTypeName === "VRset");
   const aiServers = resources.filter((r) => r.resourceTypeName === "AIserver");
 
-  //Page with resourcecard component
-  return (
-  <div className="p-6 space-y-12">
+  //Checking disabled slots for selected date
+  const currentSlots = useMemo(() => {
+    if (!selectedResource || !selectedDateKey) return null;
 
-    {desks.length > 0 && (
-      <div>
-        <h3 className="text-2xl font-bold mb-4 text-center">Desks</h3>
-        <br />
-        <div className="grid gap-6"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", maxWidth: "1200px", margin: "0 auto", }}>
-          {desks.map((r) => (
-            <div
-              key={r.resourceId}
-              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
-            >
-              <ResourceCard
-                resource={r}
-                allBookings={allBookings}
-                myBookings={myBookings}
-                onBook={handleBook}
-                onCancel={handleCancel}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
+    const k = `${selectedResource.resourceId}__${selectedDateKey}`;
+    const s = slotMap.get(k) ?? { FM: false, EF: false };
 
-    {meetingRooms.length > 0 && (
-      <div>
-        <br />
-        <h3 className="text-2xl font-bold mb-4 text-center">Meeting Rooms</h3>
-        <br />
-        <div className="grid gap-6"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", maxWidth: "1200px", margin: "0 auto", }}>
-          {meetingRooms.map((r) => (
-            <div
-              key={r.resourceId}
-              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
-            >
-              <ResourceCard
-                resource={r}
-                allBookings={allBookings}
-                myBookings={myBookings}
-                onBook={handleBook}
-                onCancel={handleCancel}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
+    const today = todayKeySthlm();
+    const hour = currentSthlmHour();
 
-    {vrSets.length > 0 && (
-      <div>
-        <br />
-        <h3 className="text-2xl font-bold mb-4 text-center">VR Headsets</h3>
-        <br />
-        <div className="grid gap-6"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", maxWidth: "1200px", margin: "0 auto", }}>
-          {vrSets.map((r) => (
-            <div
-              key={r.resourceId}
-              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
-            >
-              <ResourceCard
-                resource={r}
-                allBookings={allBookings}
-                myBookings={myBookings}
-                onBook={handleBook}
-                onCancel={handleCancel}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
+    let fmDisabled = s.FM;
+    let efDisabled = s.EF;
 
-    {aiServers.length > 0 && (
-      <div>
-        <br />
-        <h3 className="text-2xl font-bold mb-4 text-center">AI Server</h3>
-        <br />
-        <div className="grid gap-6"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", maxWidth: "500px", margin: "0 auto", }}>
-          {aiServers.map((r) => (
-            <div
-              key={r.resourceId}
-              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
-            >
-              <ResourceCard
-                resource={r}
-                allBookings={allBookings}
-                myBookings={myBookings}
-                onBook={handleBook}
-                onCancel={handleCancel}
-              />
+    if (selectedDateKey === today) {
+      fmDisabled = fmDisabled || hour >= 12;
+      efDisabled = efDisabled || hour >= 16;
+    }
+
+    return { ...s, fmDisabled, efDisabled };
+  }, [selectedResource, selectedDateKey, slotMap, allBookings]);
+
+  if (loading) return <p className="text-gray-600">Loading resources...</p>;
+
+    return (
+    <div className="p-6 space-y-12">
+      {[{ title: "Desks", list: desks },
+        { title: "Meeting Rooms", list: meetingRooms },
+        { title: "VR Headsets", list: vrSets },
+        { title: "AI Server", list: aiServers }].map(
+        ({ title, list }) =>
+          list.length > 0 && (
+            <div key={title}>
+              <h3 className="text-2xl font-bold mb-4 text-center">{title}</h3>
+              <div
+                className="grid gap-6"
+                style={{
+                  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                  maxWidth: "1200px",
+                  margin: "0 auto",
+                }}
+              >
+                {list.map((r) => (
+                  <div key={r.resourceId} className="bg-white rounded-xl p-6 shadow-sm">
+                    <ResourceCard
+                      resource={r}
+                      allBookings={allBookings}
+                      myBookings={myBookings}
+                      onOpenBooking={async (res) => {
+                        setSelectedResource(res);
+                        setSelectedDateKey(null);
+                        setTimeOfDay(null);
+
+                        //Fresh bookings when modal opens
+                        if (token) {
+                          const [ab, mb] = await Promise.all([
+                            fetchBookings(token),
+                            fetchMyBookings(token),
+                          ]);
+                          setAllBookings(ab);
+                          setMyBookings(mb);
+                        }
+                      }}
+                      onCancel={handleCancel}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          )
+      )}
+
+      {selectedResource && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full space-y-6 border shadow-xl">
+            <h2 className="text-xl font-bold text-center">
+              Booking: {selectedResource.name}
+            </h2>
+
+            <CalendarComponent
+              selectedDateKey={selectedDateKey}
+              setSelectedDateKey={setSelectedDateKey}
+              slotMap={slotMap}
+              selectedResourceId={selectedResource.resourceId}
+              dateKey={dateKey}
+            />
+
+            {selectedDateKey && currentSlots && (
+              <div>
+                <label className="block text-sm font-medium mb-1">Choose time</label>
+                <select
+                  className="border rounded-md p-2 w-full"
+                  value={timeOfDay ?? ""}
+                  onChange={(e) =>
+                    setTimeOfDay(e.target.value as "Morning" | "Afternoon")
+                  }
+                >
+                  <option value="">--Select Time--</option>
+                  <option value="Morning" disabled={currentSlots.fmDisabled}>
+                    Morning (08–12) {currentSlots.FM ? " - already booked" : ""}
+                  </option>
+                  <option value="Afternoon" disabled={currentSlots.efDisabled}>
+                    Afternoon (12–16) {currentSlots.EF ? " - already booked" : ""}
+                  </option>
+                </select>
+              </div>
+            )}
+
+            <div className="flex justify-between">
+              <Button
+                onClick={() => {
+                  if (!selectedDateKey) {
+                    toast.error("You have to choose a date!");
+                    return;
+                  }
+                  if (!timeOfDay) {
+                    toast.error("Please choose a time!");
+                    return;
+                  }
+                  handleBook(
+                    selectedResource.resourceId,
+                    selectedDateKey,
+                    timeOfDay
+                  );
+                  setSelectedResource(null);
+                  setSelectedDateKey(null);
+                  setTimeOfDay(null);
+                }}
+              >
+                Confirm Booking
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedResource(null);
+                  setSelectedDateKey(null);
+                  setTimeOfDay(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
-    )}
-  </div>
-)};
+      )}
+    </div>
+  )};

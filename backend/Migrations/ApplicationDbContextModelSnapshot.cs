@@ -259,8 +259,9 @@ namespace backend.Migrations
                     b.Property<int>("ResourceId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Timeslot")
-                        .HasColumnType("int");
+                    b.Property<string>("Timeslot")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -268,9 +269,10 @@ namespace backend.Migrations
 
                     b.HasKey("BookingId");
 
-                    b.HasIndex("ResourceId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("ResourceId", "BookingDate", "EndDate")
+                        .IsUnique();
 
                     b.ToTable("Bookings");
                 });
