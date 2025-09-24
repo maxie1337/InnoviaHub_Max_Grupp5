@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreateNewBooking : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -254,6 +254,8 @@ namespace backend.Migrations
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     BookingDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Timeslot = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     UserId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ResourceId = table.Column<int>(type: "int", nullable: false)
@@ -292,21 +294,21 @@ namespace backend.Migrations
                 columns: new[] { "ResourceId", "IsBooked", "Name", "ResourceTypeId" },
                 values: new object[,]
                 {
-                    { 1, false, "Desk #1", 1 },
-                    { 2, false, "Desk #2", 1 },
-                    { 3, false, "Desk #3", 1 },
-                    { 4, false, "Desk #4", 1 },
-                    { 5, false, "Desk #5", 1 },
-                    { 6, false, "Desk #6", 1 },
-                    { 7, false, "Desk #7", 1 },
-                    { 8, false, "Desk #8", 1 },
-                    { 9, false, "Desk #9", 1 },
-                    { 10, false, "Desk #10", 1 },
-                    { 11, false, "Desk #11", 1 },
-                    { 12, false, "Desk #12", 1 },
-                    { 13, false, "Desk #13", 1 },
-                    { 14, false, "Desk #14", 1 },
-                    { 15, false, "Desk #15", 1 },
+                    { 1, false, "Desk 1", 1 },
+                    { 2, false, "Desk 2", 1 },
+                    { 3, false, "Desk 3", 1 },
+                    { 4, false, "Desk 4", 1 },
+                    { 5, false, "Desk 5", 1 },
+                    { 6, false, "Desk 6", 1 },
+                    { 7, false, "Desk 7", 1 },
+                    { 8, false, "Desk 8", 1 },
+                    { 9, false, "Desk 9", 1 },
+                    { 10, false, "Desk 10", 1 },
+                    { 11, false, "Desk 11", 1 },
+                    { 12, false, "Desk 12", 1 },
+                    { 13, false, "Desk 13", 1 },
+                    { 14, false, "Desk 14", 1 },
+                    { 15, false, "Desk 15", 1 },
                     { 101, false, "Meeting Room 1", 2 },
                     { 102, false, "Meeting Room 2", 2 },
                     { 103, false, "Meeting Room 3", 2 },
@@ -356,9 +358,10 @@ namespace backend.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_ResourceId",
+                name: "IX_Bookings_ResourceId_BookingDate_EndDate",
                 table: "Bookings",
-                column: "ResourceId");
+                columns: new[] { "ResourceId", "BookingDate", "EndDate" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bookings_UserId",

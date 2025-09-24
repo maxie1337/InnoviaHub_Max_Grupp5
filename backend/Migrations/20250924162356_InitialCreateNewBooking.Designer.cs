@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250918080231_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250924162356_InitialCreateNewBooking")]
+    partial class InitialCreateNewBooking
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -262,15 +262,20 @@ namespace backend.Migrations
                     b.Property<int>("ResourceId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Timeslot")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("BookingId");
 
-                    b.HasIndex("ResourceId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("ResourceId", "BookingDate", "EndDate")
+                        .IsUnique();
 
                     b.ToTable("Bookings");
                 });
@@ -304,105 +309,105 @@ namespace backend.Migrations
                         {
                             ResourceId = 1,
                             IsBooked = false,
-                            Name = "Desk #1",
+                            Name = "Desk 1",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 2,
                             IsBooked = false,
-                            Name = "Desk #2",
+                            Name = "Desk 2",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 3,
                             IsBooked = false,
-                            Name = "Desk #3",
+                            Name = "Desk 3",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 4,
                             IsBooked = false,
-                            Name = "Desk #4",
+                            Name = "Desk 4",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 5,
                             IsBooked = false,
-                            Name = "Desk #5",
+                            Name = "Desk 5",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 6,
                             IsBooked = false,
-                            Name = "Desk #6",
+                            Name = "Desk 6",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 7,
                             IsBooked = false,
-                            Name = "Desk #7",
+                            Name = "Desk 7",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 8,
                             IsBooked = false,
-                            Name = "Desk #8",
+                            Name = "Desk 8",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 9,
                             IsBooked = false,
-                            Name = "Desk #9",
+                            Name = "Desk 9",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 10,
                             IsBooked = false,
-                            Name = "Desk #10",
+                            Name = "Desk 10",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 11,
                             IsBooked = false,
-                            Name = "Desk #11",
+                            Name = "Desk 11",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 12,
                             IsBooked = false,
-                            Name = "Desk #12",
+                            Name = "Desk 12",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 13,
                             IsBooked = false,
-                            Name = "Desk #13",
+                            Name = "Desk 13",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 14,
                             IsBooked = false,
-                            Name = "Desk #14",
+                            Name = "Desk 14",
                             ResourceTypeId = 1
                         },
                         new
                         {
                             ResourceId = 15,
                             IsBooked = false,
-                            Name = "Desk #15",
+                            Name = "Desk 15",
                             ResourceTypeId = 1
                         },
                         new

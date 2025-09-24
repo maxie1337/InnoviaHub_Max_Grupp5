@@ -54,7 +54,8 @@ namespace backend.Controllers
         [HttpGet("myBookings")]
         public async Task<ActionResult> GetMyBookings(bool includeExpiredBookings = false)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Console.WriteLine($"JWT userId: {userId}");
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
@@ -103,40 +104,28 @@ namespace backend.Controllers
         }
 
         [Authorize(Roles = "Admin, Member")]
-        [HttpPost("cancel/{BookingId}")]
-        public async Task<ActionResult> CancelBooking(int BookingId)
+        [HttpPost("cancel/{bookingId}")]
+        public async Task<ActionResult> CancelBooking(int bookingId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdmin = User.IsInRole("Admin");
-            var result = await _service.CancelBookingAsync(userId, isAdmin, BookingId);
 
-            if (result == "BookingNotFound")
-            {
-                return NotFound(result);
-            }
-            else if (result == "BookingHasExpired" || result == "BookingBelongsToOtherUser" || result == "Failure")
-            {
-                return Conflict(result);
-            }
-            else
-            {
-                return Ok(result);
-            }
+            var booking = await _service.CancelBookingAsync(userId, isAdmin, bookingId);
+
+            if (booking == null) return NotFound("BookingNotFound");
+
+            return Ok(booking);
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPost("delete/{BookingId}")]
-        public async Task<ActionResult> Delete(int BookingId)
+        [HttpPost("delete/{bookingId}")]
+        public async Task<ActionResult> Delete(int bookingId)
         {
-            var result = await _service.DeleteAsync(BookingId);
-            if (result == true)
-            {
-                return Ok();
-            }
-            else
-            {
-                return NotFound();
-            }
+            var booking = await _service.DeleteAsync(bookingId);
+
+            if (booking == null) return NotFound("BookingNotFound");
+
+            return Ok(booking);
         }
     }
 }

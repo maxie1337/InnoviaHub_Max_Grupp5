@@ -20,6 +20,11 @@ namespace backend.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // To hinder double booking 
+            modelBuilder.Entity<Booking>()
+                 .HasIndex(b => new { b.ResourceId, b.BookingDate, b.EndDate })
+                 .IsUnique();
+
             // Seed ResourceTypes
             modelBuilder.Entity<ResourceType>().HasData(
                 new ResourceType { ResourceTypeId = 1, Name = "DropInDesk" },
