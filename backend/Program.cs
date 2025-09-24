@@ -116,17 +116,6 @@ builder.Services.AddScoped<IJwtTokenManager, JwtTokenManager>();
 
 var app = builder.Build();
 
-// Apply pending EF Core migrations at startup, except in CI environment
-//if (!app.Environment.IsEnvironment("CI"))
-//{
-//    using (var scope = app.Services.CreateScope())
-//    {
-//        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//        db.Database.Migrate(); //applies pending migrations automatically
-//    }
-//}
-
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
