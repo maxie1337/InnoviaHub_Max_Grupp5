@@ -11,6 +11,8 @@ export default function MyBookingCard({ booking, onCancel }: ResourceCardProps) 
   const [startDateString, setStartString] = useState("");
   const [endDateString, setEndString] = useState("");
 
+  console.log(startDateString, endDateString);
+
   function formatSwedish(dateString: string) {
     return new Date(dateString).toLocaleString("sv-SE", {
       year: "numeric",
@@ -40,8 +42,8 @@ export default function MyBookingCard({ booking, onCancel }: ResourceCardProps) 
     setEndString(formatSwedish(booking.endDate));
   }, [booking.bookingDate, booking.endDate, booking.isActive]);
 
-  let badgeText = booking.isActive ? "My Booking" : "Cancelled";
-  let badgeStyle = booking.isActive ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800";
+  const badgeText = booking.isActive ? "My Booking" : "Cancelled";
+  const badgeStyle = booking.isActive ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800";
 
   const dateOnly = new Date(booking.bookingDate).toLocaleDateString("sv-SE", { timeZone: "Europe/Stockholm" });
 
