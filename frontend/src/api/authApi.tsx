@@ -10,7 +10,7 @@ export const registerUser = async (
 ): Promise<ApiResult<null>> => {
     try {
         const res = await fetch(
-            `http://localhost:5296/api/auth/register`,
+            `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -28,7 +28,7 @@ export const registerUser = async (
             const errorText = await res.text();
             return {
                 success: false,
-                message: `Registrering misslyckades: ${errorText}`,
+                message: `Registration failed: ${errorText}`,
             };
         }
 
@@ -38,7 +38,7 @@ export const registerUser = async (
         return {
             success: false,
             message:
-                "Kunde inte nå servern. Kontrollera din internetanslutning.",
+                "Could not reach the server. Check your internet connection.",
         };
     }
 };
@@ -50,7 +50,7 @@ export const loginUser = async (
 ): Promise<ApiResult<{ token: string; user: any }>> => {
     try {
         const res = await fetch(
-            `http://localhost:5296/api/auth/login`,
+            `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -62,7 +62,7 @@ export const loginUser = async (
             const errorText = await res.text();
             return {
                 success: false,
-                message: `Inloggning misslyckades: ${errorText}`,
+                message: `Login failed: ${errorText}`,
             };
         }
 
@@ -74,7 +74,7 @@ export const loginUser = async (
         return {
             success: false,
             message:
-                "Kunde inte nå servern. Kontrollera din internetanslutning.",
+                "Could not reach the server. Check your internet connection.",
         };
     }
 };

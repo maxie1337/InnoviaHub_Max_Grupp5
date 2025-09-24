@@ -30,27 +30,27 @@ const Signup = () => {
 
         // Validation
         if (!data.firstName || !data.lastName) {
-            toast.error("Ange ett namn.", {
+            toast.error("Enter a name.", {
                 position: "top-center",
             });
             return;
         }
 
         if (!emailRegex.test(data.email)) {
-            toast.error("Ogiltig e-postadress.", { position: "top-center" });
+            toast.error("Invalid email address.", { position: "top-center" });
             return;
         }
 
         if (!passwordRegex.test(data.password)) {
             toast.error(
-                "Lösenord måste vara minst 8 tecken och innehålla minst en bokstav och en siffra.",
+                "The password must be at least 8 characters long and contain a letter, a number and a special character.",
                 { position: "top-center" }
             );
             return;
         }
 
         if (data.password !== data.confirmPassword) {
-            toast.error("Lösenorden matchar inte.", {
+            toast.error("The passwords do not match.", {
                 position: "top-center",
             });
             return;
@@ -65,7 +65,7 @@ const Signup = () => {
         );
 
         if (success) {
-            toast.success("Ditt konto har skapats!", {
+            toast.success("Your account has been created!", {
                 position: "top-center",
             });
             navigate("/login");
@@ -73,86 +73,90 @@ const Signup = () => {
     };
     return (
         <div className="flex flex-col min-h-screen">
-            
-            <div className="flex flex-col min-h-screen items-center justify-center ">
-                <div className="flex flex-col items-center justify-center py-8 px-6 bg-china_rose-900 border-2 rounded-xl mt-4 mx-4 gap-8">
-                <h1 className="text-3xl font-bold my-4">Skapa konto</h1>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4 ">
-                    <FormInput
-                        type="text"
-                        name="firstName"
-                        onChange={handleChange}
-                        value={data.firstName}
-                        placeholder="Förnamn"
-                        label="Förnamn"
-                        required
-                        validationRegex={/^.{3,}$/}
-                        errorMessage="Ange ett giltigt namn (minst 3 tecken)."
-                    />
+            <div className="flex flex-1 items-center justify-center px-4 py-12 sm:py-16">
+                <div className="flex flex-col items-center justify-center w-full max-w-md sm:max-w-lg md:max-w-xl bg-true_blue-500 border-2 border-true_blue-100 rounded-2xl gap-8 p-8 sm:p-12">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+                        Sign up
+                    </h1>
+                    <form
+                        onSubmit={handleSubmit}
+                        className="flex flex-col gap-4 w-full"
+                    >
+                        <FormInput
+                            type="text"
+                            name="firstName"
+                            onChange={handleChange}
+                            value={data.firstName}
+                            placeholder="First name"
+                            label="First name"
+                            required
+                            validationRegex={/^.{3,}$/}
+                            errorMessage="Enter a valid name (at least 3 characters)."
+                        />
 
-                    <FormInput
-                        type="text"
-                        name="lastName"
-                        value={data.lastName}
-                        onChange={handleChange}
-                        placeholder="Efternamn"
-                        label="Efternamn"
-                        required
-                        validationRegex={/^.{3,}$/}
-                        errorMessage="Ange ett giltigt namn (minst 3 tecken)."
-                    />
+                        <FormInput
+                            type="text"
+                            name="lastName"
+                            value={data.lastName}
+                            onChange={handleChange}
+                            placeholder="Last name"
+                            label="Last name"
+                            required
+                            validationRegex={/^.{3,}$/}
+                            errorMessage="Enter a valid name (at least 3 characters)."
+                        />
 
-                    <FormInput
-                        type="email"
-                        name="email"
-                        onChange={handleChange}
-                        value={data.email}
-                        placeholder="E-post"
-                        label="E-post"
-                        required
-                        validationRegex={/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/}
-                        errorMessage="Ange en giltig e-postadress."
-                    />
+                        <FormInput
+                            type="email"
+                            name="email"
+                            onChange={handleChange}
+                            value={data.email}
+                            placeholder="Email"
+                            label="Email"
+                            required
+                            validationRegex={/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/}
+                            errorMessage="Enter a valid email address."
+                        />
 
-                    <FormInput
-                        type="password"
-                        name="password"
-                        onChange={handleChange}
-                        value={data.password}
-                        placeholder="Lösenord"
-                        label="Lösenord"
-                        required
-                        validationRegex={
-                            /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{8,}$/
-                        }
-                        errorMessage="Lösenordet måste vara minst 8 tecken, innehålla en bokstav, en siffra och ett specialtecken."
-                    />
+                        <FormInput
+                            type="password"
+                            name="password"
+                            onChange={handleChange}
+                            value={data.password}
+                            placeholder="Password"
+                            label="Password"
+                            required
+                            validationRegex={
+                                /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\S]{8,}$/
+                            }
+                            errorMessage="The password must be at least 8 characters long and contain a letter, a number and a special character."
+                        />
 
-                    <FormInput
-                        type="password"
-                        name="confirmPassword"
-                        onChange={handleChange}
-                        value={data.confirmPassword}
-                        placeholder="Bekräfta lösenord"
-                        label="Bekräfta lösenord"
-                        required
-                        errorMessage="Bekräfta lösenordet."
-                    />
-                    <div className="flex justify-center my-6">
-                        <Button
-                            design="outline"
-                            className="text-blue-500 border-blue-500 hover:bg-sapphire-600 hover:text-white"
-                        >
-                            Skapa konto
-                        </Button>
-                    </div>
-                    <p className="text-blue-500">
-                        Har du ett konto?{" "}
-                        <span className="text-[#7a7a7a] cursor-pointer hover:text-black">
-                            <Link to="/login">Logga in här.</Link>
-                        </span>
-                    </p>
-                </form>
+                        <FormInput
+                            type="password"
+                            name="confirmPassword"
+                            onChange={handleChange}
+                            value={data.confirmPassword}
+                            placeholder="Confirm Password"
+                            label="Confirm Password"
+                            required
+                            errorMessage="Confirm the password."
+                        />
+                        <div className="flex justify-center my-6">
+                            <Button
+                                design="outline"
+                                className="text-white border-white hover:bg-sapphire-900 hover:text-black hover:border-black w-full sm:w-auto"
+                            >
+                                Create account
+                            </Button>
+                        </div>
+                        <p className="text-white text-center text-sm sm:text-base">
+                            Already have an account?{" "}
+                            <span className="font-semibold cursor-pointer hover:text-black">
+                                <Link to="/login">Sign in here.</Link>
+                            </span>
+                        </p>
+                    </form>
                 </div>
             </div>
         </div>

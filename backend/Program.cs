@@ -17,6 +17,11 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddOpenApi();
+
+builder.Configuration
+    .AddEnvironmentVariables();
+
 
 // Add services to the container.
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
@@ -38,7 +43,7 @@ builder.Services.AddEndpointsApiExplorer();
 // Add Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+    new MySqlServerVersion(new Version(8, 0, 33))));
 
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -76,7 +81,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+            "http://localhost:5173",    // development
+            "https://innovia-hub.netlify.app"   // production
+            )
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -86,95 +94,68 @@ builder.Services.AddCors(options =>
 // Add Authorization
 builder.Services.AddAuthorization();
 
-// Add Swagger/OpenAPI
-builder.Services.AddSwaggerGen(c =>
+// Add SignalR
+
+// If connection string is provided in Azure use Azure SignalR Service.
+// Otherwise use the normal in-process SignalR (so local dev keeps working).
+var azureSignalRConnection = builder.Configuration["Azure:SignalR:ConnectionString"];
+
+if (!string.IsNullOrEmpty(azureSignalRConnection))
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "InnoviaHub Admin API",
-        Version = "v1",
-        Description = "Comprehensive Admin API for InnoviaHub System",
-        Contact = new Microsoft.OpenApi.Models.OpenApiContact
-        {
-            Name = "InnoviaHub Team",
-            Email = "admin@innoviahub.com"
-        }
-    });
-
-    // Add JWT Authentication to Swagger
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-
-    // Include XML comments
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-    {
-        c.IncludeXmlComments(xmlPath);
-    }
-});
-
-builder.Services.AddSignalR();
+    // You can pass the connection string explicitly or let the SDK read the env var.
+    builder.Services.AddSignalR()
+           .AddAzureSignalR(options => options.ConnectionString = azureSignalRConnection);
+}
+else
+{
+    builder.Services.AddSignalR();
+}
 
 // Add JWT Token Manager
 builder.Services.AddScoped<IJwtTokenManager, JwtTokenManager>();
 
 var app = builder.Build();
 
+// Apply pending EF Core migrations at startup, except in CI environment
+if (!app.Environment.IsEnvironment("CI"))
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate(); //applies pending migrations automatically
+    }
+}
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "InnoviaHub Admin API v1");
-        c.RoutePrefix = "swagger";
-        c.DocumentTitle = "InnoviaHub Admin API Documentation";
-        c.DefaultModelsExpandDepth(-1);
-        c.DisplayRequestDuration();
-    });
-    
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
 
 
 // Seed default roles and users
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("CI"))
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    using (var scope = app.Services.CreateScope())
+    {
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-    await DbSeeder.SeedRolesAndUsersAsync(roleManager, userManager);
+        await DbSeeder.SeedRolesAndUsersAsync(roleManager, userManager);
+    }
 }
+
 
 // Add middleware
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseCors("FrontendPolicy");
+
 app.MapHub<BookingHub>("/bookingHub").RequireCors("FrontendPolicy");
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

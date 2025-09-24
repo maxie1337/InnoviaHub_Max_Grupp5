@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { loginUser, registerUser } from "../api/authApi";
 import { UserContext } from "./UserContext";
 import type { User, UserContextInterface } from "./UserContext";
+import AnimatedSimpleLoading from "@/components/AnimatedIcons/AnimatedSimpleLoading.tsx";
 
 // Define the props that UserProvider accepts
 // "children" means any React components inside <UserProvider>
@@ -23,26 +24,34 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
-        
-        console.log('UserProvider: Loading stored data - token:', !!storedToken, 'user:', !!storedUser);
-        
+
+        console.log(
+            "UserProvider: Loading stored data - token:",
+            !!storedToken,
+            "user:",
+            !!storedUser
+        );
+
         if (storedToken) {
             setToken(storedToken);
-            console.log('UserProvider: Token loaded from localStorage');
+            console.log("UserProvider: Token loaded from localStorage");
         }
-        
+
         if (storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
                 setUser(parsedUser);
-                console.log('UserProvider: User loaded from localStorage:', parsedUser);
+                console.log(
+                    "UserProvider: User loaded from localStorage:",
+                    parsedUser
+                );
             } catch (error) {
                 console.error("Error parsing stored user data:", error);
                 localStorage.removeItem("user");
             }
         }
-        
-        console.log('UserProvider: Initial load completed');
+
+        console.log("UserProvider: Initial load completed");
         setLoading(false);
     }, []);
 
@@ -64,7 +73,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
         if (!result.success) {
             toast.error(
-                result.message || "Ett fel inträffade vid registrering."
+                result.message || "An error occurred during registration."
             );
             return false;
         }
@@ -77,7 +86,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         const result = await loginUser(email, password);
 
         if (!result.success || !result.data) {
-            toast.error(result.message || "Ett fel inträffade vid inloggning.");
+            toast.error(result.message || "An error occurred during login.");
             return false;
         }
 
@@ -89,8 +98,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         setToken(result.data.token);
         setUser(result.data.user);
 
-        console.log('UserProvider: Login successful, user saved:', result.data.user);
-        console.log('UserProvider: Token saved:', result.data.token);
+        console.log(
+            "UserProvider: Login successful, user saved:",
+            result.data.user
+        );
+        console.log("UserProvider: Token saved:", result.data.token);
         return true;
     };
 
@@ -102,16 +114,23 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         setUser({ email: "" });
         setToken("");
 
-        console.log('UserProvider: Logout successful, all data cleared');
-        toast.success("Du är utloggad!", {
+        console.log("UserProvider: Logout successful, all data cleared");
+        toast.success("You are logged out!", {
             position: "top-center",
         });
     };
 
     const isAuthenticated = token ? true : false;
-    
+
     // Debug logging
-    console.log('UserProvider: Current state - token:', !!token, 'user:', user.email, 'isAuthenticated:', isAuthenticated);
+    console.log(
+        "UserProvider: Current state - token:",
+        !!token,
+        "user:",
+        user.email,
+        "isAuthenticated:",
+        isAuthenticated
+    );
 
     // This object will be passed down to all components using the context
     const contextValue: UserContextInterface = {
@@ -124,7 +143,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         isAuthenticated,
     };
 
-    if (loading) return <p>Laddar användare...</p>;  
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <AnimatedSimpleLoading />
+            </div>
+        );
+    }
 
     return (
         <UserContext.Provider value={contextValue}>
