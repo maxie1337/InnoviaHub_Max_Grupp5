@@ -1603,14 +1603,14 @@
         }
       }
     },
-    "/api/Bookings/cancel/{BookingId}": {
+    "/api/Bookings/cancel/{bookingId}": {
       "post": {
         "tags": [
           "Bookings"
         ],
         "parameters": [
           {
-            "name": "BookingId",
+            "name": "bookingId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1626,14 +1626,14 @@
         }
       }
     },
-    "/api/Bookings/delete/{BookingId}": {
+    "/api/Bookings/delete/{bookingId}": {
       "post": {
         "tags": [
           "Bookings"
         ],
         "parameters": [
           {
-            "name": "BookingId",
+            "name": "bookingId",
             "in": "path",
             "required": true,
             "schema": {
@@ -2215,6 +2215,9 @@
             "type": "string",
             "format": "date-time"
           },
+          "timeslot": {
+            "type": "string"
+          },
           "userId": {
             "type": "string"
           },
@@ -2232,6 +2235,8 @@
       },
       "BookingDTO": {
         "required": [
+          "resourceId",
+          "bookingDate",
           "timeslot"
         ],
         "type": "object",
@@ -2241,8 +2246,7 @@
             "format": "int32"
           },
           "bookingDate": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "timeslot": {
             "type": "string"
