@@ -1,4 +1,6 @@
 using System;
+using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Models;
 using backend.Repositories;
@@ -51,29 +53,55 @@ namespace backend.Services
         public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)
         {
             var resource = await _resourceService.GetByIdAsync(dto.ResourceId);
-            if (resource == null)
+            if (resource == null) throw new Exception("ResourceDoesntExist");
+            if (dto.Timeslot != "FM" && dto.Timeslot != "EF") throw new Exception("NoTimeslotSpecified");
+            if (string.IsNullOrWhiteSpace(dto.BookingDate)) throw new Exception("InvalidDate");
+
+            var tz = TimeZoneInfo.FindSystemTimeZoneById("Europe/Stockholm");
+
+            if (!DateTime.TryParseExact(dto.BookingDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateOnly))
             {
-                throw new Exception("ResourceDoesntExist");
-            }
-            if (dto.Timeslot != "FM" && dto.Timeslot != "EF")
-            {
-                throw new Exception("NoTimeslotSpecified");
+                throw new Exception("InvalidDateFormat");
             }
 
-            DateTime bDate = dto.BookingDate;
+            var nowSthlm = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tz);
+            if (dateOnly.Date < nowSthlm.Date) throw new Exception("DateInPast");
+
+            var startLocal = dto.Timeslot == "FM" ? dateOnly.Date.AddHours(8) : dateOnly.Date.AddHours(12);
+            var endLocal   = dto.Timeslot == "FM" ? dateOnly.Date.AddHours(12) : dateOnly.Date.AddHours(16);
+
+            if (dateOnly.Date == nowSthlm.Date)
+            {
+                if (dto.Timeslot == "FM" && nowSthlm.TimeOfDay >= new TimeSpan(12, 0, 0))
+                    throw new Exception("TimeslotAlreadyPassed");
+                if (dto.Timeslot == "EF" && nowSthlm.TimeOfDay >= new TimeSpan(16, 0, 0))
+                    throw new Exception("TimeslotAlreadyPassed");
+            }
+
+            var startUtc = TimeZoneInfo.ConvertTimeToUtc(startLocal, tz);
+            var endUtc   = TimeZoneInfo.ConvertTimeToUtc(endLocal, tz);
+
+            var conflict = await _context.Bookings.AnyAsync(b =>
+                b.ResourceId == dto.ResourceId &&
+                b.IsActive &&
+                b.BookingDate == startUtc &&
+                b.EndDate == endUtc
+            );
+            if (conflict) throw new Exception("TimeslotAlreadyBooked");
+
+
             var booking = new Booking
             {
                 IsActive = true,
-                BookingDate = dto.Timeslot == "FM" ? new DateTime(bDate.Year, bDate.Month, bDate.Day, 8, 0, 0) : new DateTime(bDate.Year, bDate.Month, bDate.Day, 12, 0, 0),
-                EndDate = dto.Timeslot == "FM" ? new DateTime(bDate.Year, bDate.Month, bDate.Day, 12, 0, 0) : new DateTime(bDate.Year, bDate.Month, bDate.Day, 16, 0, 0),
+                BookingDate = startUtc,
+                EndDate = endUtc,
                 UserId = UserId,
-                ResourceId = dto.ResourceId
+                ResourceId = dto.ResourceId,
+                Timeslot = dto.Timeslot
             };
 
             var created = await _repository.CreateAsync(booking);
-
             await _hubContext.Clients.All.SendAsync("BookingCreated", created);
-
             return created;
         }
 
@@ -87,34 +115,30 @@ namespace backend.Services
             return updated;
         }
 
-        public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
+        public async Task<Booking?> CancelBookingAsync(string userId, bool isAdmin, int bookingId)
         {
-            var result = await _repository.CancelBookingAsync(UserId, isAdmin, BookingId);
-            return result;
-        }
-
-        public async Task<bool> DeleteAsync(int BookingId)
-        {
-            var booking = await _repository.GetByIdAsync(BookingId);
-            if (booking == null) return false;
-
-            // Om bokningen fortfarande är aktiv, frigör resursen
-            var resource = await _context.Resources.FindAsync(booking.ResourceId);
-            if (resource != null)
+            var booking = await _repository.CancelBookingAsync(userId, isAdmin, bookingId);
+            if (booking != null)
             {
-                resource.IsBooked = false;
+                await _hubContext.Clients.All.SendAsync("BookingCancelled", booking);
             }
+            return booking;
+        }
+        public async Task<Booking?> DeleteAsync(int bookingId)
+        {
+            var booking = await _repository.DeleteAsync(bookingId);
+            if (booking != null)
+            {
+                var resource = await _context.Resources.FindAsync(booking.ResourceId);
+                if (resource != null)
+                {
+                    resource.IsBooked = false;
+                    await _hubContext.Clients.All.SendAsync("ResourceUpdated", resource);
+                }
 
-            var result = await _repository.DeleteAsync(BookingId);
-            await _context.SaveChangesAsync();
-
-            // Skicka SignalR-event
-            if (resource != null)
-                await _hubContext.Clients.All.SendAsync("ResourceUpdated", resource);
-
-            await _hubContext.Clients.All.SendAsync("BookingDeleted", BookingId);
-
-            return result;
+                await _hubContext.Clients.All.SendAsync("BookingDeleted", booking);
+            }
+            return booking;
         }
     }
 }

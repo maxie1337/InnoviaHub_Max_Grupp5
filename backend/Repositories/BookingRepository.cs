@@ -31,7 +31,7 @@ public class BookingRepository : IBookingRepository
         var result = await _context.Bookings
         .Include(b => b.Resource)
         .FirstOrDefaultAsync(b => b.BookingId == BookingId);
-        
+
         return result;
     }
 
@@ -45,10 +45,9 @@ public class BookingRepository : IBookingRepository
 
         if (includeExpiredBookings == false)
         {
-            var currentTime = DateTime.Now;
-            query = query.Where(b => currentTime < b.EndDate);
+            var now = DateTime.UtcNow;
+            query = query.Where(b => b.EndDate > now);
         }
-
         return await query.ToListAsync();
     }
 
@@ -61,7 +60,7 @@ public class BookingRepository : IBookingRepository
 
         if (includeExpiredBookings == false)
         {
-            var currentTime = DateTime.Now;
+            var currentTime = DateTime.UtcNow;
             query = query.Where(b => currentTime < b.EndDate);
         }
 
@@ -82,51 +81,37 @@ public class BookingRepository : IBookingRepository
         return booking;
     }
 
-    public async Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId)
+    public async Task<Booking?> CancelBookingAsync(string userId, bool isAdmin, int bookingId)
+{
+    var booking = await _context.Bookings
+        .Include(b => b.Resource)
+        .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+
+    if (booking == null) return null;
+
+    var currentTime = DateTime.UtcNow;
+    if (!isAdmin && booking.UserId != userId) return null;
+    if (currentTime > booking.EndDate) return null;
+
+    booking.IsActive = false;
+    await _context.SaveChangesAsync();
+    await _hubContext.Clients.All.SendAsync("BookingCancelled", booking);
+    return booking;
+}
+
+    public async Task<Booking?> DeleteAsync(int bookingId)
     {
-        var booking = _context.Bookings
-        .FirstOrDefault(b => b.BookingId == BookingId);
+        var booking = await _context.Bookings
+            .Include(b => b.Resource)
+            .FirstOrDefaultAsync(b => b.BookingId == bookingId);
 
-        var currentTime = DateTime.Now;
-        if (booking == null)
-        {
-            return "BookingNotFound";
-        }
-        else if (!isAdmin && booking.UserId != UserId)
-        {
-            return "BookingBelongsToOtherUser";
-        }
-        else if (currentTime > booking.EndDate)
-        {
-            return "BookingHasExpired";
-        }
+        if (booking == null) return null;
 
-        var result = await DeleteAsync(booking.BookingId);
-        if (result == true)
-        {
-            // Skicka SignalR-event
-            await _hubContext.Clients.All.SendAsync("BookingCancelled", booking.BookingId);
+        _context.Bookings.Remove(booking);
+        await _context.SaveChangesAsync();
 
-            return "Success";
-        }
-        else
-        {
-            return "Failure";
-        }
-    }
-    
-    public async Task<bool> DeleteAsync(int BookingId)
-    {
-        var booking = await _context.Bookings.FindAsync(BookingId);
-        if (booking != null)
-        {
-            _context.Bookings.Remove(booking);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        await _hubContext.Clients.All.SendAsync("BookingDeleted", booking);
+
+        return booking;
     }
 }

@@ -7,11 +7,11 @@ namespace backend.Repositories;
 public interface IBookingRepository
 {
     Task<IEnumerable<Booking>> GetAllAsync();
-    Task<Booking> GetByIdAsync(int BookingId);
-    Task<IEnumerable<Booking>> GetMyBookingsAsync(string UserId, bool includeExpiredBookings);
-    Task<IEnumerable<GetResourceBookingsDTO>> GetResourceBookingsAsync(int resourceId, bool includeExpiredBookings);
+    Task<Booking?> GetByIdAsync(int bookingId);
+    Task<IEnumerable<Booking>> GetMyBookingsAsync(string userId, bool includeExpiredBookings = false);
+    Task<IEnumerable<GetResourceBookingsDTO>> GetResourceBookingsAsync(int resourceId, bool includeExpiredBookings = false);
     Task<Booking> CreateAsync(Booking booking);
     Task<Booking> UpdateAsync(Booking booking);
-    Task<string> CancelBookingAsync(string UserId, bool isAdmin, int BookingId);
-    Task<bool> DeleteAsync(int BookingId);
+    Task<Booking?> CancelBookingAsync(string userId, bool isAdmin, int bookingId);
+    Task<Booking?> DeleteAsync(int bookingId);
 }
