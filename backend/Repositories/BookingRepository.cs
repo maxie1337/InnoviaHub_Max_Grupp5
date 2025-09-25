@@ -67,11 +67,27 @@ public class BookingRepository : IBookingRepository
         return await query.ToListAsync();
     }
 
-    public async Task<Booking> CreateAsync(Booking booking)
+    public async Task<BookingResponseDTO> CreateAsync(Booking booking)
     {
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
-        return booking;
+
+
+        // Load related resource
+        var resource = await _context.Resources
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.ResourceId == booking.ResourceId);
+
+        return new BookingResponseDTO
+        {
+            BookingId = booking.BookingId,
+            BookingDate = booking.BookingDate,
+            EndDate = booking.EndDate,
+            Timeslot = booking.Timeslot,
+            IsActive = booking.IsActive,
+            ResourceId = booking.ResourceId,
+            ResourceName = resource?.Name ?? ""
+        };
     }
 
     public async Task<Booking> UpdateAsync(Booking booking)

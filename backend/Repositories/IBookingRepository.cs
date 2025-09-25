@@ -10,7 +10,7 @@ public interface IBookingRepository
     Task<Booking?> GetByIdAsync(int bookingId);
     Task<IEnumerable<Booking>> GetMyBookingsAsync(string userId, bool includeExpiredBookings = false);
     Task<IEnumerable<GetResourceBookingsDTO>> GetResourceBookingsAsync(int resourceId, bool includeExpiredBookings = false);
-    Task<Booking> CreateAsync(Booking booking);
+    Task<BookingResponseDTO> CreateAsync(Booking booking);
     Task<Booking> UpdateAsync(Booking booking);
     Task<Booking?> CancelBookingAsync(string userId, bool isAdmin, int bookingId);
     Task<Booking?> DeleteAsync(int bookingId);

@@ -89,18 +89,7 @@ namespace backend.Controllers
             
             var created = await _service.CreateAsync(userId, dto);
 
-            // project entity → DTO
-            var response = new BookingResponseDTO
-            {
-                BookingId = created.BookingId,
-                BookingDate = created.BookingDate,
-                Timeslot = created.Timeslot,
-                IsActive = created.IsActive,
-                ResourceId = created.ResourceId,
-                ResourceName = created.Resource?.Name ?? ""
-            };
-
-            return CreatedAtAction(nameof(GetById), new { BookingId = created.BookingId }, response);
+            return CreatedAtAction(nameof(GetById), new { BookingId = created.BookingId }, created);
         }
 
         [Authorize(Roles = "Admin")]

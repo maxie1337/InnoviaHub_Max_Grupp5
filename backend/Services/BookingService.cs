@@ -50,7 +50,7 @@ namespace backend.Services
             return await _repository.GetResourceBookingsAsync(resourceId, includeExpiredBookings);
         }
 
-        public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)
+        public async Task<BookingResponseDTO> CreateAsync(string UserId, BookingDTO dto)
         {
             var resource = await _resourceService.GetByIdAsync(dto.ResourceId);
             if (resource == null) throw new Exception("ResourceDoesntExist");
@@ -101,6 +101,7 @@ namespace backend.Services
             };
 
             var created = await _repository.CreateAsync(booking);
+
             await _hubContext.Clients.All.SendAsync("BookingCreated", created);
             return created;
         }
