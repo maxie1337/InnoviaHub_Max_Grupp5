@@ -20,7 +20,7 @@ namespace backend.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Resource> GetByIdAsync(int id)
+        public async Task<Resource?> GetByIdAsync(int id)
         {
             return await _context.Resources
                 .Include(r => r.ResourceType)

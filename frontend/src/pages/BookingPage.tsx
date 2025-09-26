@@ -10,19 +10,23 @@ import CalendarComponent from "@/components/Calender/calenderComponent";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
-//Format for bookingdate (Stockholm time)
-const dateKey = (d: Date | string) => {
+//Builds a key form stockholm date, month year date
+const dateKeySthlm = (d: Date | string) => {
   const date = typeof d === "string" ? new Date(d) : d;
   if (isNaN(date.getTime())) return "";
-  return date.toLocaleDateString("sv-SE", {
+  const fmt = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Europe/Stockholm",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  });
+  }).formatToParts(date);
+  const y = fmt.find(p => p.type === "year")?.value ?? "";
+  const m = fmt.find(p => p.type === "month")?.value ?? "";
+  const day = fmt.find(p => p.type === "day")?.value ?? "";
+  return `${y}-${m}-${day}`;
 };
 
-//Current time stockholm
+//Gets current hour in stockholm
 const currentSthlmHour = () =>
   parseInt(
     new Intl.DateTimeFormat("sv-SE", {
@@ -33,14 +37,8 @@ const currentSthlmHour = () =>
     10
   );
 
-//Year month date for today in stockholm
-const todayKeySthlm = () =>
-  new Intl.DateTimeFormat("sv-SE", {
-    timeZone: "Europe/Stockholm",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+//Gets todays year month date i stockholm
+const todayKeySthlm = () => dateKeySthlm(new Date());
 
 export default function BookingsPage() {
   const { token } = useContext(UserContext);
@@ -53,9 +51,11 @@ export default function BookingsPage() {
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
   const [timeOfDay, setTimeOfDay] = useState<"Morning" | "Afternoon" | null>(null);
 
+  //SignalR connection
   const connectionRef = useRef<signalR.HubConnection | null>(null);
   const hubUrl = useMemo(() => `${import.meta.env.VITE_API_BASE_URL}/bookingHub`, []);
 
+  //Looking for booked slots, with help of stockholm date & time
   type DaySlots = { FM: boolean; EF: boolean };
   const slotMap = useMemo(() => {
     const map = new Map<string, DaySlots>();
@@ -63,28 +63,29 @@ export default function BookingsPage() {
     for (const b of allBookings) {
       if (!b.isActive) continue;
 
-      const stockholmDate = new Date(b.bookingDate).toLocaleString("sv-SE", { timeZone: "Europe/Stockholm" });
-      const dateStr = new Date(stockholmDate).toISOString().slice(0, 10);
-
-      const key = `${b.resource.resourceId}__${dateStr}`;
+      // Convert booking start to a Stockholm day key
+      const keyDate = dateKeySthlm(new Date(b.bookingDate));
+      const key = `${b.resource.resourceId}__${keyDate}`;
       const entry = map.get(key) ?? { FM: false, EF: false };
 
-      const slot = b.timeslot;
-
-      if (slot === "FM") entry.FM = true;
-      if (slot === "EF") entry.EF = true;
+      if (b.timeslot === "FM") entry.FM = true;
+      if (b.timeslot === "EF") entry.EF = true;
 
       map.set(key, entry);
     }
     return map;
   }, [allBookings]);
 
-  //Fetching bookings & recources 
+  //Fetching resources & bookings
   useEffect(() => {
     if (!token) return;
-    (async () => {
+    const fetchData = async () => {
       try {
-        const [r, ab, mb] = await Promise.all([fetchResources(token), fetchBookings(token), fetchMyBookings(token)]);
+        const [r, ab, mb] = await Promise.all([
+          fetchResources(token),
+          fetchBookings(token),
+          fetchMyBookings(token)
+        ]);
         setResources(r);
         setAllBookings(ab);
         setMyBookings(mb);
@@ -93,10 +94,11 @@ export default function BookingsPage() {
       } finally {
         setLoading(false);
       }
-    })();
+    };
+    fetchData();
   }, [token]);
 
-  //SignalR Connection and listeners for actions
+  //Setup SignalR for real time updating
   useEffect(() => {
     if (!token) return;
 
@@ -113,13 +115,16 @@ export default function BookingsPage() {
 
     const refreshData = async () => {
       if (!token) return;
-      const [r, ab, mb] = await Promise.all([fetchResources(token), fetchBookings(token), fetchMyBookings(token)]);
+      const [r, ab, mb] = await Promise.all([
+        fetchResources(token),
+        fetchBookings(token),
+        fetchMyBookings(token)
+      ]);
       setResources(r);
       setAllBookings(ab);
       setMyBookings(mb);
     };
 
-    //Starting connection
     const start = async () => {
       try {
         await connection.start();
@@ -132,14 +137,12 @@ export default function BookingsPage() {
         connection.on("ResourceUpdated", refreshData);
       } catch (err) {
         console.error("SignalR connect error:", err);
-        //Fallback on timeout, 5 sek
         setTimeout(start, 5000);
       }
     };
 
     start();
 
-    //Stopping connection
     return () => {
       connection.off("BookingCreated");
       connection.off("BookingUpdated");
@@ -150,7 +153,7 @@ export default function BookingsPage() {
     };
   }, [token, hubUrl]);
 
-  //Function to handle booking
+  //Creates booking
   const handleBook = async (
     resourceId: number,
     dateKeyStr: string,
@@ -161,10 +164,6 @@ export default function BookingsPage() {
     const today = todayKeySthlm();
     const hour = currentSthlmHour();
 
-    if (dateKeyStr < today) {
-      toast.error("You cannot book a past date.");
-      return;
-    }
     if (dateKeyStr === today) {
       if (time === "Morning" && hour >= 12) {
         toast.error("Morning has already passed today.");
@@ -177,17 +176,20 @@ export default function BookingsPage() {
     }
 
     try {
-      //Backend saving in UTC
       const dto: BookingDTO = {
         resourceId,
-        bookingDate: dateKeyStr,  
+        bookingDate: dateKeyStr,
         timeslot: time === "Morning" ? "FM" : "EF",
       };
 
       await createBooking(token, dto);
       toast.success("Booking created!");
 
-      const [r, ab, mb] = await Promise.all([fetchResources(token), fetchBookings(token), fetchMyBookings(token)]);
+      const [r, ab, mb] = await Promise.all([
+        fetchResources(token),
+        fetchBookings(token),
+        fetchMyBookings(token)
+      ]);
       setResources(r);
       setAllBookings(ab);
       setMyBookings(mb);
@@ -197,14 +199,18 @@ export default function BookingsPage() {
     }
   };
 
-  //Cancel booking function
+  //Cancels booking
   const handleCancel = async (bookingId: number) => {
     if (!token) return;
     try {
       await cancelBooking(token, bookingId);
       toast.success("Booking canceled!");
 
-      const [r, ab, mb] = await Promise.all([fetchResources(token), fetchBookings(token), fetchMyBookings(token)]);
+      const [r, ab, mb] = await Promise.all([
+        fetchResources(token),
+        fetchBookings(token),
+        fetchMyBookings(token)
+      ]);
       setResources(r);
       setAllBookings(ab);
       setMyBookings(mb);
@@ -213,13 +219,13 @@ export default function BookingsPage() {
       toast.error(err?.message ?? "Could not cancel booking");
     }
   };
-  
+
   const desks = resources.filter((r) => r.resourceTypeName === "DropInDesk");
   const meetingRooms = resources.filter((r) => r.resourceTypeName === "MeetingRoom");
   const vrSets = resources.filter((r) => r.resourceTypeName === "VRset");
   const aiServers = resources.filter((r) => r.resourceTypeName === "AIserver");
 
-  //Checking disabled slots for selected date
+  //Checks available slots for current day
   const currentSlots = useMemo(() => {
     if (!selectedResource || !selectedDateKey) return null;
 
@@ -242,7 +248,7 @@ export default function BookingsPage() {
 
   if (loading) return <p className="text-gray-600">Loading resources...</p>;
 
-    return (
+  return (
     <div className="p-6 space-y-12">
       {[{ title: "Desks", list: desks },
         { title: "Meeting Rooms", list: meetingRooms },
@@ -271,7 +277,6 @@ export default function BookingsPage() {
                         setSelectedDateKey(null);
                         setTimeOfDay(null);
 
-                        //Fresh bookings when modal opens
                         if (token) {
                           const [ab, mb] = await Promise.all([
                             fetchBookings(token),
@@ -302,7 +307,7 @@ export default function BookingsPage() {
               setSelectedDateKey={setSelectedDateKey}
               slotMap={slotMap}
               selectedResourceId={selectedResource.resourceId}
-              dateKey={dateKey}
+              dateKey={dateKeySthlm}
             />
 
             {selectedDateKey && currentSlots && (
@@ -357,11 +362,12 @@ export default function BookingsPage() {
                   setTimeOfDay(null);
                 }}
               >
-                Cancel
+                Close
               </Button>
             </div>
           </div>
         </div>
       )}
     </div>
-  )};
+  );
+}

@@ -9,7 +9,6 @@ import "./MyBookings.css";
 
 const MyBookings: React.FC = () => {
   const { token } = useContext(UserContext);
-
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,12 +17,12 @@ const MyBookings: React.FC = () => {
     []
   );
 
+  //Fetch and setup realtime updates
   useEffect(() => {
     if (!token) return;
 
-    // Initial fetch
-    Promise.all([fetchMyBookings(token)])
-      .then(([bookings]) => {
+    fetchMyBookings(token)
+      .then((bookings) => {
         setMyBookings(bookings);
       })
       .catch(() => {
@@ -31,7 +30,7 @@ const MyBookings: React.FC = () => {
       })
       .finally(() => setLoading(false));
 
-    // SignalR connection
+    //Setting up SignalR connection
     const connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => token || "",
@@ -41,26 +40,26 @@ const MyBookings: React.FC = () => {
       .withAutomaticReconnect()
       .build();
 
+    const refreshData = async () => {
+      const newBookings = await fetchMyBookings(token);
+      setMyBookings(newBookings);
+    };
+
     const start = async () => {
       try {
         await connection.start();
         console.log("SignalR connected (MyBookings)");
+        connection.on("BookingCreated", refreshData);
+        connection.on("BookingCancelled", refreshData);
+        connection.on("BookingDeleted", refreshData);
+        connection.on("BookingUpdated", refreshData);
       } catch (err) {
         console.error("SignalR start error:", err);
       }
     };
     start();
 
-    const refreshData = async () => {
-      const [newMyBookings] = await Promise.all([fetchMyBookings(token)]);
-      setMyBookings(newMyBookings);
-    };
-
-    connection.on("BookingCreated", refreshData);
-    connection.on("BookingCancelled", refreshData);
-    connection.on("BookingDeleted", refreshData);
-    connection.on("BookingUpdated", refreshData);
-     return () => {
+    return () => {
       connection.off("BookingCreated", refreshData);
       connection.off("BookingCancelled", refreshData);
       connection.off("BookingDeleted", refreshData);
@@ -69,20 +68,21 @@ const MyBookings: React.FC = () => {
     };
   }, [token, hubUrl]);
 
+  //Cancels a booking and refreshes
   const handleCancel = async (bookingId: number) => {
     if (!token) return;
     try {
       await cancelBooking(token, bookingId);
       toast.success("Bokning avbokad!");
-
-      const [newMyBookings] = await Promise.all([fetchMyBookings(token)]);
-      setMyBookings(newMyBookings);
+      const newBookings = await fetchMyBookings(token);
+      setMyBookings(newBookings);
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message ?? "Kunde inte avboka");
     }
   };
 
+  //Sorting active bookings by start date
   const activeSorted = useMemo(
     () =>
       myBookings
