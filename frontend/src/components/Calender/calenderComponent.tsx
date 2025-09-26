@@ -19,29 +19,27 @@ const CalendarComponent = ({
   selectedResourceId,
   dateKey,
 }: CalendarComponentProps) => {
-  //Blocks all days before today
-  const minDateLocalMidnightForToday = useMemo(() => {
+  //Min selectable date
+  const minDate = useMemo(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }, []);
 
+  //When user clicks a day, save the timekey (stockholm time)
   const handleClickDay = useCallback(
-    (date: Date) => {
-      //Save day at Stockholm Time
-      setSelectedDateKey(dateKey(date));
-    },
+    (date: Date) => setSelectedDateKey(dateKey(date)),
     [dateKey, setSelectedDateKey]
   );
 
-  //Disableing tiles back in time, will grey out if both times are booked
+  //Disable past days and days where both FM & EF are booked
   const tileDisabled = ({ date }: { date: Date }) => {
-    if (date < minDateLocalMidnightForToday) return true;
-
+    if (date < minDate) return true;
     const k = `${selectedResourceId}__${dateKey(date)}`;
     const s = slotMap.get(k);
     return !!(s && s.FM && s.EF);
   };
 
+  //Highlight selected date
   const tileClassName = ({ date }: { date: Date }) => {
     const key = dateKey(date);
     return key === selectedDateKey ? "bg-blue-500 text-white font-bold" : "";
@@ -51,7 +49,7 @@ const CalendarComponent = ({
     <div className="w-full">
       <h2 className="text-lg font-semibold text-center mb-4">Choose a date</h2>
       <Calendar
-        minDate={minDateLocalMidnightForToday}
+        minDate={minDate}
         onClickDay={handleClickDay}
         tileDisabled={tileDisabled}
         tileClassName={tileClassName}
