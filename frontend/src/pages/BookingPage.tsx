@@ -63,23 +63,16 @@ export default function BookingsPage() {
     for (const b of allBookings) {
       if (!b.isActive) continue;
 
-      const key = `${b.resource.resourceId}__${dateKey(b.bookingDate)}`;
+      const stockholmDate = new Date(b.bookingDate).toLocaleString("sv-SE", { timeZone: "Europe/Stockholm" });
+      const dateStr = new Date(stockholmDate).toISOString().slice(0, 10);
+
+      const key = `${b.resource.resourceId}__${dateStr}`;
       const entry = map.get(key) ?? { FM: false, EF: false };
 
-      //FM EM For swedish time
-      const sthlmHour = parseInt(
-      new Intl.DateTimeFormat("sv-SE", {
-        timeZone: "Europe/Stockholm",
-        hour: "2-digit",
-        hour12: false,
-      }).format(new Date(b.bookingDate)),
-      10
-    );
-
-      const slot: "FM" | "EF" = sthlmHour < 12 ? "FM" : "EF";
+      const slot = b.timeslot;
 
       if (slot === "FM") entry.FM = true;
-      else entry.EF = true;
+      if (slot === "EF") entry.EF = true;
 
       map.set(key, entry);
     }
@@ -245,7 +238,7 @@ export default function BookingsPage() {
     }
 
     return { ...s, fmDisabled, efDisabled };
-  }, [selectedResource, selectedDateKey, slotMap, allBookings]);
+  }, [selectedResource, selectedDateKey, slotMap]);
 
   if (loading) return <p className="text-gray-600">Loading resources...</p>;
 

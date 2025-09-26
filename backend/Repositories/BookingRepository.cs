@@ -67,27 +67,12 @@ public class BookingRepository : IBookingRepository
         return await query.ToListAsync();
     }
 
-    public async Task<BookingResponseDTO> CreateAsync(Booking booking)
+    public async Task<Booking> CreateAsync(Booking booking)
     {
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
 
-
-        // Load related resource
-        var resource = await _context.Resources
-            .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.ResourceId == booking.ResourceId);
-
-        return new BookingResponseDTO
-        {
-            BookingId = booking.BookingId,
-            BookingDate = booking.BookingDate,
-            EndDate = booking.EndDate,
-            Timeslot = booking.Timeslot,
-            IsActive = booking.IsActive,
-            ResourceId = booking.ResourceId,
-            ResourceName = resource?.Name ?? ""
-        };
+        return booking;
     }
 
     public async Task<Booking> UpdateAsync(Booking booking)
@@ -105,11 +90,12 @@ public class BookingRepository : IBookingRepository
 
     if (booking == null) return null;
 
-    var currentTime = DateTime.UtcNow;
+    //var currentTime = DateTime.UtcNow;
     if (!isAdmin && booking.UserId != userId) return null;
-    if (currentTime > booking.EndDate) return null;
+    //if (currentTime > booking.EndDate) return null;
 
-    booking.IsActive = false;
+    //booking.IsActive = false;
+     _context.Remove(booking);
     await _context.SaveChangesAsync();
     await _hubContext.Clients.All.SendAsync("BookingCancelled", booking);
     return booking;

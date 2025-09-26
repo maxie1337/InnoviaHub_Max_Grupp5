@@ -50,7 +50,7 @@ namespace backend.Services
             return await _repository.GetResourceBookingsAsync(resourceId, includeExpiredBookings);
         }
 
-        public async Task<BookingResponseDTO> CreateAsync(string UserId, BookingDTO dto)
+        public async Task<Booking> CreateAsync(string UserId, BookingDTO dto)
         {
             var resource = await _resourceService.GetByIdAsync(dto.ResourceId);
             if (resource == null) throw new Exception("ResourceDoesntExist");
