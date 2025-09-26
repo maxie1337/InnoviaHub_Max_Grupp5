@@ -25,10 +25,12 @@ Detta projekt är ett bokningssystem för ett coworkingcenter där man kan boka 
 - Skapa en SQL connection på localhost:3306.
 - Gå in på "appsettings.json" i backend-mappen.
 - I strängen "DefaultConnection", ändra "User" till din connections användarnamn och "Password" till din connections lösenord.
+- Sätt en secretkey till minst 32 tecken.
 
 ## Starta applikationen
 ```
 cd backend
+dotnet restore
 dotnet ef database update
 dotnet run
 ```
