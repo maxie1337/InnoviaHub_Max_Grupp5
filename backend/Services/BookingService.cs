@@ -67,18 +67,15 @@ namespace backend.Services
 
             //Start and end times based on FM/EF
             var startLocal = dto.Timeslot == "FM" ? localDate.Date.AddHours(8) : localDate.Date.AddHours(12);
-            var endLocal   = dto.Timeslot == "FM" ? localDate.Date.AddHours(12) : localDate.Date.AddHours(16);
+            var endLocal = dto.Timeslot == "FM" ? localDate.Date.AddHours(12) : localDate.Date.AddHours(16);
 
-            //Convert to UTC time
-            var startUtc = startLocal.ToUniversalTime();
-            var endUtc   = endLocal.ToUniversalTime();
 
             //Check if timeslot already booked
             var conflict = await _context.Bookings.AnyAsync(b =>
                 b.ResourceId == dto.ResourceId &&
                 b.IsActive &&
-                b.BookingDate == startUtc &&
-                b.EndDate == endUtc
+                b.BookingDate == startLocal &&
+                b.EndDate == endLocal
             );
             if (conflict) throw new Exception("Timeslot already booked");
 
@@ -86,8 +83,8 @@ namespace backend.Services
             var booking = new Booking
             {
                 IsActive = true,
-                BookingDate = startUtc,
-                EndDate = endUtc,
+                BookingDate = startLocal,
+                EndDate = endLocal,
                 UserId = userId,
                 ResourceId = dto.ResourceId,
                 Timeslot = dto.Timeslot
@@ -136,6 +133,47 @@ namespace backend.Services
                 await _hubContext.Clients.All.SendAsync("Booking deleted", booking);
             }
             return booking;
+        }
+
+        //Getting all available resources for dates, so chatbot can give a answer to the user
+        public async Task<Dictionary<string, List<string>>> GetAvailableResourcesByDateAsync(DateTime date, string? filter = null)
+        {
+            //Getting all resources
+            var resources = await _context.Resources
+                .Include(r => r.ResourceType)
+                .ToListAsync();
+
+            //Filter for name or resource type
+            if (!string.IsNullOrWhiteSpace(filter))
+            {
+                filter = filter.ToLower();
+
+                resources = resources
+                    .Where(r =>
+                        r.Name.ToLower().Contains(filter) ||
+                        r.ResourceType.Name.ToLower().Contains(filter))
+                    .ToList();
+            }
+
+            var result = new Dictionary<string, List<string>>();
+
+            foreach (var resource in resources)
+            {
+                var available = await _repository.GetAvailableTimesAsync(resource.ResourceId, date);
+                if (available.Any())
+                {
+                    result.Add(resource.Name, available.ToList());
+                }
+            }
+
+            return result;
+        }
+        public async Task<IEnumerable<string>> GetAvailableTimesAsync(int resourceId, DateTime date)
+        {
+            var availableSlots = await _repository.GetAvailableTimesAsync(resourceId, date);
+
+            return availableSlots;
+
         }
     }
 }

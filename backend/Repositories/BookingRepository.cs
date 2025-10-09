@@ -115,5 +115,48 @@ namespace backend.Repositories
             await _hubContext.Clients.All.SendAsync("BookingDeleted", booking);
             return booking;
         }
-    }
+
+        //Checking available times for resources. If FM or EM is booked on chosen time, they will be removed. Cant answer those dates.
+        public async Task<IEnumerable<string>> GetAvailableTimesAsync(int resourceId, DateTime date)
+        {
+            var availableSlots = new List<string> { "FM", "EM" };
+
+            var fmStart = date.Date.AddHours(8);
+            var fmEnd = date.Date.AddHours(12);
+
+            var emStart = date.Date.AddHours(12);
+            var emEnd = date.Date.AddHours(16);
+
+            var fmBooked = await _context.Bookings.AnyAsync(b =>
+
+            b.IsActive &&
+            b.ResourceId == resourceId &&
+            b.BookingDate == fmStart &&
+            b.BookingDate == fmEnd
+
+            );
+
+            if (fmBooked)
+            {
+                availableSlots.Remove("FM");
+            }
+
+            var emBooked = await _context.Bookings.AnyAsync(b =>
+            b.IsActive &&
+            b.ResourceId == resourceId &&
+            b.BookingDate == emStart &&
+            b.BookingDate == emEnd
+
+            );
+
+            if (emBooked)
+            {
+                availableSlots.Remove("EM");
+            }
+
+            return availableSlots;
+
+        }
+        
+    } 
 }

@@ -14,4 +14,5 @@ public interface IBookingRepository
     Task<Booking> UpdateAsync(Booking booking);
     Task<Booking?> CancelBookingAsync(string userId, bool isAdmin, int bookingId);
     Task<Booking?> DeleteAsync(int bookingId);
+    Task<IEnumerable<string>> GetAvailableTimesAsync(int resourceId, DateTime date);
 }
