@@ -14,4 +14,7 @@ public interface IBookingService
     Task<Booking> UpdateAsync(Booking booking);
     Task<Booking?> CancelBookingAsync(string UserId, bool isAdmin, int BookingId);
     Task<Booking?> DeleteAsync(int BookingId);
+    Task<Dictionary<string, List<string>>> GetAvailableResourcesByDateAsync(DateTime date, string? filter = null);
+
+    Task<IEnumerable<string>> GetAvailableTimesAsync(int resourceId, DateTime date);
 }

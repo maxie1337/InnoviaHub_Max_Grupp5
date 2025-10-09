@@ -4,6 +4,7 @@ using backend.Services;
 using backend.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Repositories;
 
 namespace backend.Controllers
 {
@@ -101,7 +102,7 @@ namespace backend.Controllers
             return updated == null ? NotFound() : Ok(updated);
         }
 
-    
+
         //Cancels a booking
         [Authorize(Roles = "Admin, Member")]
         [HttpPost("cancel/{bookingId}")]
@@ -125,6 +126,27 @@ namespace backend.Controllers
             if (booking == null) return NotFound("BookingNotFound");
 
             return Ok(booking);
+        }
+
+        //Getting available resourecs for selected date, filtering on keywords
+        //[Authorize(Roles = "Admin, Member")]
+        [HttpGet("availability/resources")]
+        public async Task<IActionResult> GetAvailableResources([FromQuery] DateTime date, [FromQuery] string? filter = null)
+        {
+            var result = await _service.GetAvailableResourcesByDateAsync(date, filter);
+            return Ok(result);
+        }
+
+        //Test to check if getting times for selected date works in postman
+        [HttpGet("timetest")]
+        public async Task<IActionResult> TestTimes()
+        {
+            int resourceId = 1; 
+            DateTime date = new DateTime(2025, 10, 10);
+
+            var times = await _service.GetAvailableTimesAsync(resourceId, date);
+
+            return Ok(times);
         }
     }
 }
