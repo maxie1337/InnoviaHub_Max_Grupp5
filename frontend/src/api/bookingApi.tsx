@@ -57,3 +57,29 @@ export async function deleteBooking(token: string, bookingId: number) {
   });
   if (!res.ok) throw new Error("Couldnt delete bookings");
 }
+
+export async function getResourcesByDate(token: string,date: string,filter?: string)
+: Promise<Record<string, string[]>> 
+{
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const params = new URLSearchParams({ date });
+  if (filter) params.append("filter", filter);
+
+  const res = await fetch(
+    `${BASE_URL}/api/bookings/availability/resources?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Kunde inte hämta resurser: ${res.status} - ${text}`);
+  }
+
+  return res.json();
+}

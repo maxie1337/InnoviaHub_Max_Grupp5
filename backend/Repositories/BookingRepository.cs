@@ -132,7 +132,7 @@ namespace backend.Repositories
             b.IsActive &&
             b.ResourceId == resourceId &&
             b.BookingDate == fmStart &&
-            b.BookingDate == fmEnd
+            b.EndDate == fmEnd
 
             );
 
@@ -145,7 +145,7 @@ namespace backend.Repositories
             b.IsActive &&
             b.ResourceId == resourceId &&
             b.BookingDate == emStart &&
-            b.BookingDate == emEnd
+            b.EndDate == emEnd
 
             );
 

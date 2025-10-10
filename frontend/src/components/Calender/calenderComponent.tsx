@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
-type DaySlots = { FM: boolean; EF: boolean };
+type DaySlots = { FM: boolean; EM: boolean };
 
 type CalendarComponentProps = {
   selectedDateKey: string | null;
@@ -36,7 +36,7 @@ const CalendarComponent = ({
     if (date < minDate) return true;
     const k = `${selectedResourceId}__${dateKey(date)}`;
     const s = slotMap.get(k);
-    return !!(s && s.FM && s.EF);
+    return !!(s && s.FM && s.EM);
   };
 
   //Highlight selected date

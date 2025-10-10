@@ -59,13 +59,13 @@ namespace backend.Services
             var resource = await _resourceService.GetByIdAsync(dto.ResourceId);
             if (resource == null) throw new Exception("Resource doesnt exist");
 
-            if (dto.Timeslot != "FM" && dto.Timeslot != "EF") throw new Exception("No timeslot specified");
+            if (dto.Timeslot != "FM" && dto.Timeslot != "EM") throw new Exception("No timeslot specified");
 
             //Checks the date
             if (!DateTime.TryParse(dto.BookingDate, out var localDate))
                 throw new Exception("Invalid date format");
 
-            //Start and end times based on FM/EF
+            //Start and end times based on FM/EM
             var startLocal = dto.Timeslot == "FM" ? localDate.Date.AddHours(8) : localDate.Date.AddHours(12);
             var endLocal = dto.Timeslot == "FM" ? localDate.Date.AddHours(12) : localDate.Date.AddHours(16);
 
@@ -147,6 +147,19 @@ namespace backend.Services
             if (!string.IsNullOrWhiteSpace(filter))
             {
                 filter = filter.ToLower();
+
+                var synonyms = new Dictionary<string, string>
+                {
+                    { "skrivbord", "desk" },
+                    { "mötesrum", "meeting" },
+                    { "vr", "vr" },
+                    { "headset", "vr" },
+                    { "ai", "server" },
+                    { "server", "server" }
+                };
+
+                if (synonyms.ContainsKey(filter))
+                    filter = synonyms[filter];
 
                 resources = resources
                     .Where(r =>

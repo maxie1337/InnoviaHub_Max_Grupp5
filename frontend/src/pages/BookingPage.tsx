@@ -1,8 +1,8 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import * as signalR from "@microsoft/signalr";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { UserContext } from "@/context/UserContext";
 import type { Resource } from "@/types/resource";
 import type { Booking, BookingDTO } from "@/types/booking";
+import { useBookingHub } from "@/hooks/useBookingHub";
 import { fetchResources } from "@/api/resourceApi";
 import { fetchBookings, fetchMyBookings, createBooking, cancelBooking } from "@/api/bookingApi";
 import ResourceCard from "@/components/Resource/ResourceCard";
@@ -51,12 +51,8 @@ export default function BookingsPage() {
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
   const [timeOfDay, setTimeOfDay] = useState<"Morning" | "Afternoon" | null>(null);
 
-  //SignalR connection
-  const connectionRef = useRef<signalR.HubConnection | null>(null);
-  const hubUrl = useMemo(() => `${import.meta.env.VITE_API_BASE_URL}/bookingHub`, []);
-
   //Looking for booked slots, with help of stockholm date & time
-  type DaySlots = { FM: boolean; EF: boolean };
+  type DaySlots = { FM: boolean; EM: boolean };
   const slotMap = useMemo(() => {
     const map = new Map<string, DaySlots>();
 
@@ -66,10 +62,10 @@ export default function BookingsPage() {
       // Convert booking start to a Stockholm day key
       const keyDate = dateKeySthlm(new Date(b.bookingDate));
       const key = `${b.resource.resourceId}__${keyDate}`;
-      const entry = map.get(key) ?? { FM: false, EF: false };
+      const entry = map.get(key) ?? { FM: false, EM: false };
 
       if (b.timeslot === "FM") entry.FM = true;
-      if (b.timeslot === "EF") entry.EF = true;
+      if (b.timeslot === "EM") entry.EM = true;
 
       map.set(key, entry);
     }
@@ -99,59 +95,10 @@ export default function BookingsPage() {
   }, [token]);
 
   //Setup SignalR for real time updating
-  useEffect(() => {
-    if (!token) return;
-
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl, {
-        accessTokenFactory: () => token || "",
-        skipNegotiation: true,
-        transport: signalR.HttpTransportType.WebSockets,
-      })
-      .withAutomaticReconnect()
-      .build();
-
-    connectionRef.current = connection;
-
-    const refreshData = async () => {
-      if (!token) return;
-      const [r, ab, mb] = await Promise.all([
-        fetchResources(token),
-        fetchBookings(token),
-        fetchMyBookings(token)
-      ]);
-      setResources(r);
-      setAllBookings(ab);
-      setMyBookings(mb);
-    };
-
-    const start = async () => {
-      try {
-        await connection.start();
-        console.log("SignalR connected");
-
-        connection.on("BookingCreated", refreshData);
-        connection.on("BookingUpdated", refreshData);
-        connection.on("BookingCancelled", refreshData);
-        connection.on("BookingDeleted", refreshData);
-        connection.on("ResourceUpdated", refreshData);
-      } catch (err) {
-        console.error("SignalR connect error:", err);
-        setTimeout(start, 5000);
-      }
-    };
-
-    start();
-
-    return () => {
-      connection.off("BookingCreated");
-      connection.off("BookingUpdated");
-      connection.off("BookingCancelled");
-      connection.off("BookingDeleted");
-      connection.off("ResourceUpdated");
-      connection.stop();
-    };
-  }, [token, hubUrl]);
+  useBookingHub(token, () => {
+    console.log("Booking updated - refresh via SignalR");
+  });
+  
 
   //Creates booking
   const handleBook = async (
@@ -179,7 +126,7 @@ export default function BookingsPage() {
       const dto: BookingDTO = {
         resourceId,
         bookingDate: dateKeyStr,
-        timeslot: time === "Morning" ? "FM" : "EF",
+        timeslot: time === "Morning" ? "FM" : "EM",
       };
 
       await createBooking(token, dto);
@@ -230,13 +177,13 @@ export default function BookingsPage() {
     if (!selectedResource || !selectedDateKey) return null;
 
     const k = `${selectedResource.resourceId}__${selectedDateKey}`;
-    const s = slotMap.get(k) ?? { FM: false, EF: false };
+    const s = slotMap.get(k) ?? { FM: false, EM: false };
 
     const today = todayKeySthlm();
     const hour = currentSthlmHour();
 
     let fmDisabled = s.FM;
-    let efDisabled = s.EF;
+    let efDisabled = s.EM;
 
     if (selectedDateKey === today) {
       fmDisabled = fmDisabled || hour >= 12;
@@ -325,7 +272,7 @@ export default function BookingsPage() {
                     Morning (08–12) {currentSlots.FM ? " - already booked" : ""}
                   </option>
                   <option value="Afternoon" disabled={currentSlots.efDisabled}>
-                    Afternoon (12–16) {currentSlots.EF ? " - already booked" : ""}
+                    Afternoon (12–16) {currentSlots.EM ? " - already booked" : ""}
                   </option>
                 </select>
               </div>

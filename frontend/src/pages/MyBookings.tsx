@@ -3,7 +3,7 @@ import { UserContext } from "@/context/UserContext";
 import type { Booking } from "@/types/booking";
 import { useContext, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import * as signalR from "@microsoft/signalr";
+import { useBookingHub } from "@/hooks/useBookingHub";
 import MyBookingCard from "@/components/MyBooking/MyBookingCard";
 import "./MyBookings.css";
 
@@ -11,11 +11,6 @@ const MyBookings: React.FC = () => {
   const { token } = useContext(UserContext);
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const hubUrl = useMemo(
-    () => `${import.meta.env.VITE_API_BASE_URL}/bookingHub`,
-    []
-  );
 
   //Fetch and setup realtime updates
   useEffect(() => {
@@ -29,44 +24,11 @@ const MyBookings: React.FC = () => {
         toast.error("Kunde inte hämta bokningar");
       })
       .finally(() => setLoading(false));
+  }, [token]);
 
-    //Setting up SignalR connection
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl, {
-        accessTokenFactory: () => token || "",
-        skipNegotiation: true,
-        transport: signalR.HttpTransportType.WebSockets,
-      })
-      .withAutomaticReconnect()
-      .build();
-
-    const refreshData = async () => {
-      const newBookings = await fetchMyBookings(token);
-      setMyBookings(newBookings);
-    };
-
-    const start = async () => {
-      try {
-        await connection.start();
-        console.log("SignalR connected (MyBookings)");
-        connection.on("BookingCreated", refreshData);
-        connection.on("BookingCancelled", refreshData);
-        connection.on("BookingDeleted", refreshData);
-        connection.on("BookingUpdated", refreshData);
-      } catch (err) {
-        console.error("SignalR start error:", err);
-      }
-    };
-    start();
-
-    return () => {
-      connection.off("BookingCreated", refreshData);
-      connection.off("BookingCancelled", refreshData);
-      connection.off("BookingDeleted", refreshData);
-      connection.off("BookingUpdated", refreshData);
-      connection.stop();
-    };
-  }, [token, hubUrl]);
+   useBookingHub(token, () => {
+      console.log("Booking updated - refresh via SignalR");
+    });
 
   //Cancels a booking and refreshes
   const handleCancel = async (bookingId: number) => {
