@@ -21,142 +21,156 @@ namespace backend.Controllers
 
         public record ChatRequest(string question);
 
-        // ---------------------------------------------------
-        // 📡 Huvudendpoint: Streamar svar tillbaka i realtid
-        // POST /api/ai/chat/stream
-        // ---------------------------------------------------
+        // Stremamer för svar till frontend, Server sent events heter det
         [HttpPost("stream")]
         public async Task StreamChat([FromBody] ChatRequest request)
         {
+            // Http-header för att svaren ska streamas
             Response.ContentType = "text/event-stream";
+            Response.Headers["Cache-Control"] = "no-cache";
+            Response.Headers["X-Accel-Buffering"] = "no";
+            Response.Headers["Connection"] = "keep-alive";
+            await Response.Body.FlushAsync();
 
-            // Försök tolka datum och resurstyp från frågan
-            var (date, filter) = ExtractDateAndFilter(request.question);
-
-            // 🧠 Om det är en bokningsfråga → svara med backend-data
-            if (date != null)
+            try
             {
-                var resources = await _bookingService.GetAvailableResourcesByDateAsync(date.Value, filter);
+                // Försöker hitta datum och kategori via frågan från user
+                var (date, filter) = ExtractDateAndFilter(request.question);
 
-                var sb = new StringBuilder();
-
-                if (!resources.Any())
+                // Frågar man om lediga resurser, ska data hämtas från bookingservice
+                if (date != null)
                 {
-                    sb.AppendLine($"Inga lediga resurser hittades för {date.Value:yyyy-MM-dd}.");
-                }
-                else
-                {
-                    sb.AppendLine($"Följande resurser är lediga den {date.Value:yyyy-MM-dd}:");
+                    var resources = await _bookingService.GetAvailableResourcesByDateAsync(date.Value, filter);
 
-                    foreach (var res in resources)
+                    var category = filter switch
                     {
-                        var readable = res.Value.Select(slot => slot == "FM" ? "förmiddag" : "eftermiddag");
-                        sb.AppendLine($"- {res.Key}: {string.Join(", ", readable)}");
+                        "skrivbord" or "desk" => "skrivbord",
+                        "mötesrum" or "meeting" => "mötesrum",
+                        "vr" or "headset" => "VR-headsets",
+                        "ai" or "server" => "AI-servrar",
+                        _ => "resurser"
+                    };
+
+                    var list = resources.Keys.ToList();
+
+                    // Datan skickas som JSON till frontenden
+                    var json = JsonSerializer.Serialize(new
+                    {
+                        type = "availability",
+                        category,
+                        date = date.Value.ToString("yyyy-MM-dd"),
+                        resources = list
+                    });
+
+                    await Response.WriteAsync($"data: {json}\n\n");
+                    await Response.Body.FlushAsync();
+                    return;
+                }
+                // Funkar det inte frågas GPT via OPEN ai för att det ska kännas "levande"
+                var http = _httpClientFactory.CreateClient("openai");
+
+                var body = new
+                {
+                    model = "gpt-4.1",
+                    messages = new[]
+                    {
+                        new {
+                            role = "system",
+                            content = "Du är assistent för Innovia Hub. Du hjälper användare att boka skrivbord, mötesrum, VR-headsets och AI-servrar. Du är proffesionel, snäll och hjälpsam. Svara alltid på samma språk som användaren."
+                        },
+                        new { role = "user", content = request.question }
+                    },
+                    stream = true
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+                var response = await http.PostAsync("chat/completions", content, HttpContext.RequestAborted);
+                var stream = await response.Content.ReadAsStreamAsync();
+                using var reader = new StreamReader(stream);
+                var buffer = new StringBuilder();
+
+                // Stremar varje textdel till frontenden så att den ska byggas upp i realtid
+                while (!reader.EndOfStream && !HttpContext.RequestAborted.IsCancellationRequested)
+                {
+                    var line = await reader.ReadLineAsync();
+                    if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("data:")) continue;
+
+                    var jsonLine = line.Substring("data:".Length).Trim();
+                    if (jsonLine == "[DONE]") break;
+
+                    using var doc = JsonDocument.Parse(jsonLine);
+                    var delta = doc.RootElement.GetProperty("choices")[0].GetProperty("delta");
+
+                    // Hämtar texten och skickar till frontend
+                    if (delta.TryGetProperty("content", out var contentProp))
+                    {
+                        var tokenText = contentProp.GetString();
+                        if (!string.IsNullOrEmpty(tokenText))
+                        {
+                            await Response.WriteAsync($"data: {tokenText}\n\n");
+                            await Response.Body.FlushAsync();
+                        }
                     }
                 }
-
-                // Skicka tillbaka texten som stream
-                await Response.WriteAsync($"data: {sb}\n\n");
-                await Response.Body.FlushAsync();
-                return;
             }
-
-            // 🧠 Annars – fråga OpenAI via stream
-            var http = _httpClientFactory.CreateClient("openai");
-
-            var body = new
+            catch (Exception ex)
             {
-                model = "gpt-4",
-                messages = new[]
+                // Fel skickas som JSOn
+                Console.WriteLine($"Stream error: {ex.Message}");
+                if (!Response.HasStarted)
                 {
-                    new { role = "user", content = request.question }
-                },
-                stream = true
-            };
-
-            var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
-            var response = await http.PostAsync("chat/completions", content, HttpContext.RequestAborted);
-            var stream = await response.Content.ReadAsStreamAsync();
-            using var reader = new StreamReader(stream);
-
-            while (!reader.EndOfStream && !HttpContext.RequestAborted.IsCancellationRequested)
-            {
-                var line = await reader.ReadLineAsync();
-                if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("data:")) continue;
-
-                var json = line.Substring("data:".Length).Trim();
-                if (json == "[DONE]") break;
-
-                using var doc = JsonDocument.Parse(json);
-                var text = doc.RootElement
-                    .GetProperty("choices")[0]
-                    .GetProperty("delta")
-                    .GetProperty("content")
-                    .GetString();
-
-                if (!string.IsNullOrEmpty(text))
-                {
-                    await Response.WriteAsync($"data: {text}\n\n");
-                    await Response.Body.FlushAsync();
+                    Response.ContentType = "application/json";
+                    await Response.WriteAsync(JsonSerializer.Serialize(new { error = ex.Message }));
                 }
             }
         }
 
-
+        // Tolkning av data och resurstyp (skrivbord, fredag t.ex)
         private (DateTime? date, string? filter) ExtractDateAndFilter(string question)
         {
-            DateTime? parsedDate = null;
+            var lower = question.ToLower();
+            var today = DateTime.Today;
+            DateTime? date = null;
 
-            // 1. Matcha ISO-format: yyyy-MM-dd
-            var isoMatch = System.Text.RegularExpressions.Regex.Match(question, @"\d{4}-\d{2}-\d{2}");
-            if (isoMatch.Success && DateTime.TryParse(isoMatch.Value, out var d1))
+            // Kan söka med ord som idag, imorgon och förstår vilka dagar man är ute efter
+            if (lower.Contains("idag") || lower.Contains("today")) date = today;
+            else if (lower.Contains("imorgon") || lower.Contains("tomorrow")) date = today.AddDays(1);
+            else
             {
-                parsedDate = d1;
-            }
-
-            // 2. Tolka svensk datumtext (ex. "10 oktober")
-            if (parsedDate == null)
-            {
-                var cleaned = question
-                    .Replace("den", "")
-                    .Replace("på", "")
-                    .Replace("bokning", "")
-                    .Replace("tillgänglig", "")
-                    .Trim();
-
-                var svCulture = new CultureInfo("sv-SE");
-                var formats = new[]
+                var days = new Dictionary<string, DayOfWeek>
                 {
-                    "d MMMM",            // 10 oktober
-                    "d MMMM yyyy",       // 10 oktober 2025
-                    "dd-MM-yyyy",        // 10-10-2025
-                    "yyyy-MM-dd",        // ISO
-                    "d/M/yyyy"           // 10/10/2025
+                    ["måndag"] = DayOfWeek.Monday,
+                    ["tisdag"] = DayOfWeek.Tuesday,
+                    ["onsdag"] = DayOfWeek.Wednesday,
+                    ["torsdag"] = DayOfWeek.Thursday,
+                    ["fredag"] = DayOfWeek.Friday,
+                    ["lördag"] = DayOfWeek.Saturday,
+                    ["söndag"] = DayOfWeek.Sunday
                 };
 
-                foreach (var format in formats)
+                foreach (var kv in days)
                 {
-                    if (DateTime.TryParseExact(cleaned, format, svCulture, DateTimeStyles.None, out var d2))
+                    if (lower.Contains(kv.Key))
                     {
-                        parsedDate = d2;
+                        int diff = ((int)kv.Value - (int)today.DayOfWeek + 7) % 7;
+                        date = today.AddDays(diff == 0 ? 7 : diff);
                         break;
                     }
                 }
+
+                // Matchar datumformat
+                if (date == null)
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(question, @"\b\d{4}-\d{2}-\d{2}\b");
+                    if (match.Success && DateTime.TryParse(match.Value, out var parsed)) date = parsed;
+                }
             }
 
-            // 3. Leta efter filterord i frågan
-            var possibleFilters = new[]
-            {
-                "skrivbord", "desk",
-                "mötesrum", "meeting",
-                "vr", "headset",
-                "ai", "server"
-            };
+            // Hittar resurstyp med hjälp av dessa sökord
+            var filters = new[] { "skrivbord", "desk", "mötesrum", "meeting", "vr", "headset", "ai", "server" };
+            var foundFilter = filters.FirstOrDefault(f => lower.Contains(f));
 
-            string? foundFilter = possibleFilters.FirstOrDefault(f =>
-                question.ToLower().Contains(f.ToLower()));
-
-            return (parsedDate, foundFilter);
+            return (date, foundFilter);
         }
     }
 }

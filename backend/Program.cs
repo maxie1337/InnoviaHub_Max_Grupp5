@@ -1,3 +1,4 @@
+using backend.Controllers;
 using backend.Data;
 using backend.Hubs;
 using backend.Mapping;

@@ -1691,7 +1691,7 @@
         }
       }
     },
-    "/api/ai/Chat": {
+    "/api/ai/Chat/stream": {
       "post": {
         "tags": [
           "Chat"

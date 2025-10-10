@@ -1,3 +1,5 @@
+import { useContext } from "react";
+import { UserContext } from "@/context/UserContext";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
@@ -16,8 +18,12 @@ import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop.tsx";
+import ChatBotPopup from "@/components/Chatbot/ChatBotPopup";
+
 
 function App() {
+    const { isAuthenticated, token } = useContext(UserContext);
+    
     return (
         <div className="App min-h-screen flex flex-col">
             <ScrollToTop />
@@ -100,6 +106,7 @@ function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <Footer />
+         {isAuthenticated && <ChatBotPopup token={token} />}
         </div>
     );
 }
