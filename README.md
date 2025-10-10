@@ -27,6 +27,17 @@ Detta projekt är ett bokningssystem för ett coworkingcenter där man kan boka 
 - I strängen "DefaultConnection", ändra "User" till din connections användarnamn och "Password" till din connections lösenord.
 - Sätt en secretkey till minst 32 tecken.
 
+## Env filer
+För att projektet ska fungera att köra så måste du ha en .env fil i backenden med en api nyckel från OpenAI.
+Skapa en .env fil i roten av backenden, där csproj ligger. I .env filen så gör du följande:
+OPEN_API_KEY="DIN OPEN AI NYCKEL"
+
+I frontenden så behöver du också två olika .env filer. Du behöver en .env för produktion, och en .env.development för att köra projektet i dev läge lokalt.
+Skapa en .env fil och en .env.development fil i roten av frontendmappen. I .env filerna gör du följande:
+.env: VITE_API_BASE_URL=DIN_PRODUKTIONS_URL
+.env.development: VITE_API_BASE_URL=http://localhost:5296
+
+
 ## Starta applikationen
 ```
 cd backend
