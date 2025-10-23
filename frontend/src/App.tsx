@@ -19,6 +19,7 @@ import Footer from "./components/footer";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import ChatBotPopup from "@/components/Chatbot/ChatBotPopup";
+import InnoviaDeviceList from "@/components/IOT/InnoviaDeviceList.tsx";
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <BookingPage />{" "}
+                            <InnoviaDeviceList />
                         </ProtectedRoute>
                     }
                 />
@@ -47,6 +49,7 @@ function App() {
                         <ProtectedRoute>
                             {" "}
                             <MyBookings />{" "}
+                            <InnoviaDeviceList />
                         </ProtectedRoute>
                     }
                 />
