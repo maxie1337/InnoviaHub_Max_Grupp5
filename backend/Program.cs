@@ -152,7 +152,6 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-
 // Add middleware
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
@@ -160,7 +159,6 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseCors("FrontendPolicy");
 
 app.MapHub<BookingHub>("/bookingHub").RequireCors("FrontendPolicy");
-
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
