@@ -1,5 +1,6 @@
 # Om
 Detta projekt är ett bokningssystem för ett coworkingcenter där man kan boka skrivbord, mötesrum, etc med realtidsuppdatering.
+Utöver detta så finns det en AI chatbot för bokning att ta hjälp av, och även IoT implementeringar för att ha koll på temperatur i de olika rummen på anläggningen.
 
 # Teknisk information
 ## Ramverk och bibliotek
@@ -62,6 +63,11 @@ Admins kan använda admin tools genom att gå in på [http://localhost:5173/admi
 **Admin konto:** <br />
 **E-post: admin@innoviahub.com**, <br />
 **Lösenord: Admin123!**
+
+## Egna funktioner  
+De funktioner som jag har utvecklat vidare själv är:  
+- AI Chatbot  
+- IoT implementering av temperatur enheter
 
 # Endpoints
 <details>
