@@ -161,6 +161,7 @@ app.UseCors("FrontendPolicy");
 
 app.MapHub<BookingHub>("/bookingHub").RequireCors("FrontendPolicy");
 
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
