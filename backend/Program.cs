@@ -158,6 +158,7 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseCors("FrontendPolicy");
 
+
 app.MapHub<BookingHub>("/bookingHub").RequireCors("FrontendPolicy");
 
 app.UseHttpsRedirection();
