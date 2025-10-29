@@ -165,7 +165,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();
 app.MapControllers().RequireCors("FrontendPolicy");
-app.Run();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -177,3 +176,5 @@ using (var scope = app.Services.CreateScope())
 
     await DbSeeder.SeedRolesAndUsersAsync(roleManager, userManager);
 }
+
+app.Run();
