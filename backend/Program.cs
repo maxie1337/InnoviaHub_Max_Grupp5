@@ -21,11 +21,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 DotNetEnv.Env.Load();
 
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddOpenApi();
-}
-
 builder.Configuration
     .AddEnvironmentVariables();
 
@@ -56,7 +51,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-builder.Services.AddEndpointsApiExplorer();
 
 // Add Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -146,7 +140,15 @@ else
 // Add JWT Token Manager
 builder.Services.AddScoped<IJwtTokenManager, JwtTokenManager>();
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddOpenApi();
+    builder.Services.AddEndpointsApiExplorer();
+}
+
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

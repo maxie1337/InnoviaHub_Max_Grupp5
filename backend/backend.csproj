@@ -6,10 +6,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
    
-  <PropertyGroup Condition="'$(DOTNET_ENVIRONMENT)' != 'CI'">
-		<OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
-		<OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)</OpenApiDocumentsDirectory>
-	</PropertyGroup>
+ <PropertyGroup Condition="'$(DOTNET_ENVIRONMENT)' == 'Development'">
+  <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+  <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)</OpenApiDocumentsDirectory>
+</PropertyGroup>
+
+<PropertyGroup Condition="'$(DOTNET_ENVIRONMENT)' != 'Development'">
+  <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+</PropertyGroup>
+
+<Target Name="DisableOpenApiGenerationInNonDev" BeforeTargets="GenerateOpenApiDocuments"
+        Condition="'$(DOTNET_ENVIRONMENT)' != 'Development'">
+  <PropertyGroup>
+    <GenerateOpenApiDocuments>false</GenerateOpenApiDocuments>
+  </PropertyGroup>
+</Target>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="15.0.1" />
