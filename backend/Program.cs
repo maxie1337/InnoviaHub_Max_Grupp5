@@ -21,7 +21,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 DotNetEnv.Env.Load();
 
-builder.Services.AddOpenApi();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddOpenApi();
+}
 
 builder.Configuration
     .AddEnvironmentVariables();
