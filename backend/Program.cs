@@ -91,6 +91,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
 // Cors implementation for frontend
 builder.Services.AddCors(options =>
 {
