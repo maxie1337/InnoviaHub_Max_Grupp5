@@ -57,8 +57,22 @@ builder.Services.AddEndpointsApiExplorer();
 
 // Add Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    new MySqlServerVersion(new Version(8, 0, 33))));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    options.UseMySql(
+        connectionString,
+        ServerVersion.AutoDetect(connectionString),
+        mySqlOptions =>
+        {
+            mySqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 10,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null
+            );
+        }
+    );
+});
 
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -140,14 +154,14 @@ if (app.Environment.IsDevelopment())
 
 
 // Seed default roles and users
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await db.Database.MigrateAsync();
 
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
     await DbSeeder.SeedRolesAndUsersAsync(roleManager, userManager);
 }
 
