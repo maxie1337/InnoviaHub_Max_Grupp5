@@ -111,7 +111,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddAuthorization();
 
 // Add SignalR
-
 // If connection string is provided in Azure use Azure SignalR Service.
 // Otherwise use the normal in-process SignalR (so local dev keeps working).
 var azureSignalRConnection = builder.Configuration["Azure:SignalR:ConnectionString"];
